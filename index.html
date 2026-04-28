@@ -11,7 +11,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <style>
-  /* ============== Design Tokens ============== */
   :root {
     --bg: #fbf8f3;
     --bg-elev: #ffffff;
@@ -36,8 +35,6 @@
     --sans: 'Manrope', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     --mono: 'JetBrains Mono', ui-monospace, monospace;
   }
-
-  /* ============== Reset ============== */
   *, *::before, *::after { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -55,18 +52,8 @@
   input, select, textarea { font-family: inherit; }
   ::selection { background: var(--gold-soft); color: var(--ink); }
 
-  /* ============== Header ============== */
-  header.site {
-    padding: 32px 24px 8px;
-    text-align: center;
-    position: relative;
-  }
-  .brand {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
+  header.site { padding: 32px 24px 8px; text-align: center; position: relative; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .brand-mark {
     width: 38px; height: 38px;
     border-radius: 9px;
@@ -100,11 +87,8 @@
     color: var(--gold);
   }
 
-  /* ===== Highlighted tagline ===== */
-  .tagline-wrap {
-    display: flex; justify-content: center;
-    margin: 6px auto 28px;
-  }
+  /* Highlighted tagline */
+  .tagline-wrap { display: flex; justify-content: center; margin: 6px auto 28px; }
   .tagline {
     position: relative;
     display: inline-block;
@@ -120,11 +104,11 @@
     position: absolute;
     inset: 4px -2px 6px -2px;
     background: linear-gradient(120deg,
-      rgba(255,243,156,.0) 0%,
+      rgba(255,243,156,0) 0%,
       rgba(255,243,156,.95) 12%,
       rgba(244,227,182,.85) 50%,
       rgba(255,243,156,.95) 88%,
-      rgba(255,243,156,.0) 100%);
+      rgba(255,243,156,0) 100%);
     transform: skewX(-8deg);
     border-radius: 4px;
     z-index: -1;
@@ -139,11 +123,7 @@
     -webkit-text-fill-color: transparent;
     animation: shimmer 4.5s linear infinite;
   }
-  .tagline .dot {
-    color: var(--gold);
-    margin: 0 8px;
-    font-weight: 700;
-  }
+  .tagline .dot { color: var(--gold); margin: 0 8px; font-weight: 700; }
   .tagline .author {
     font-family: var(--display);
     font-style: italic;
@@ -156,17 +136,12 @@
     0%, 100% { opacity: .85; transform: skewX(-8deg) scaleX(1); }
     50% { opacity: 1; transform: skewX(-8deg) scaleX(1.02); }
   }
-  @keyframes shimmer {
-    to { background-position: 200% center; }
-  }
+  @keyframes shimmer { to { background-position: 200% center; } }
 
-  /* ============== Stepper ============== */
+  /* Stepper */
   .stepper {
-    display: flex;
-    justify-content: center;
-    gap: 4px;
-    max-width: 820px;
-    margin: 0 auto 28px;
+    display: flex; justify-content: center; gap: 4px;
+    max-width: 820px; margin: 0 auto 28px;
     padding: 0 16px;
   }
   .step-item {
@@ -210,13 +185,8 @@
     color: #fff;
     box-shadow: 0 0 0 5px rgba(29,41,69,.08);
   }
-  .step-item.active .label,
-  .step-item.active .label small { color: var(--ink); }
-  .step-item.done .circle {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #fff;
-  }
+  .step-item.active .label, .step-item.active .label small { color: var(--ink); }
+  .step-item.done .circle { background: var(--gold); border-color: var(--gold); color: #fff; }
   .step-item.done .label { color: var(--ink-soft); }
   .step-item:not(:last-child)::after {
     content: '';
@@ -225,17 +195,10 @@
     top: 18px; height: 1.5px;
     background: var(--line);
   }
-  .step-item.done:not(:last-child)::after {
-    background: var(--gold);
-  }
+  .step-item.done:not(:last-child)::after { background: var(--gold); }
   .step-item .circle svg { width: 16px; height: 16px; }
 
-  /* ============== Main Card ============== */
-  main {
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 0 16px 60px;
-  }
+  main { max-width: 1180px; margin: 0 auto; padding: 0 16px 60px; }
   .card {
     background: var(--bg-elev);
     border: 1px solid var(--line);
@@ -259,7 +222,7 @@
     margin: 0 0 28px;
   }
 
-  /* ============== Step 1: Upload ============== */
+  /* Step 1 */
   .dropzone {
     border: 2px dashed var(--line);
     border-radius: var(--radius);
@@ -269,6 +232,7 @@
     transition: all .25s;
     cursor: pointer;
     position: relative;
+    display: block;
   }
   .dropzone:hover, .dropzone.dragover {
     border-color: var(--gold);
@@ -298,10 +262,7 @@
   }
   .dropzone p { color: var(--ink-mute); font-size: 13.5px; margin: 0; }
   .dropzone input { display: none; }
-  .preview-wrap {
-    margin-top: 20px;
-    text-align: center;
-  }
+  .preview-wrap { margin-top: 20px; text-align: center; }
   .preview-wrap img {
     max-width: 100%;
     max-height: 320px;
@@ -316,7 +277,7 @@
     color: var(--ink-mute);
   }
 
-  /* ============== Step 2: Design ============== */
+  /* Step 2 */
   .design-layout {
     display: grid;
     grid-template-columns: 1fr 320px;
@@ -406,31 +367,17 @@
     font-size: 16px;
     margin: 0 0 4px;
   }
-  .props .sub {
-    font-size: 12px;
-    color: var(--ink-mute);
-    margin: 0 0 16px;
-  }
+  .props .sub { font-size: 12px; color: var(--ink-mute); margin: 0 0 16px; }
   .props-empty {
     text-align: center;
     padding: 30px 12px;
     color: var(--ink-mute);
     font-size: 13px;
   }
-  .props-empty .icon {
-    font-size: 28px;
-    opacity: .4;
-    margin-bottom: 6px;
-  }
+  .props-empty .icon { font-size: 28px; opacity: .4; margin-bottom: 6px; }
 
-  /* IMPORTANT: Properly visible form rows — fix for font size visibility */
-  .prop-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-  .prop-row label {
+  .prop-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+  .prop-row > label {
     font-size: 11.5px;
     font-weight: 600;
     color: var(--ink-soft);
@@ -440,7 +387,7 @@
     justify-content: space-between;
     align-items: center;
   }
-  .prop-row label .value-display {
+  .value-display {
     font-family: var(--mono);
     font-weight: 500;
     font-size: 11.5px;
@@ -468,15 +415,12 @@
     outline: none;
     transition: border-color .15s, box-shadow .15s;
     box-sizing: border-box;
-    line-height: 1.3;
-    height: auto;
     min-height: 38px;
     -moz-appearance: textfield;
   }
   .prop-row input[type="number"]::-webkit-outer-spin-button,
   .prop-row input[type="number"]::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+    -webkit-appearance: none; margin: 0;
   }
   .prop-row input:focus,
   .prop-row select:focus {
@@ -491,7 +435,7 @@
     padding-right: 32px;
   }
 
-  /* Slider with side-by-side number — clearly visible font size */
+  /* Font size control */
   .size-control {
     display: grid;
     grid-template-columns: 1fr 64px;
@@ -530,12 +474,7 @@
     font-family: var(--mono);
   }
 
-  /* Color row */
-  .color-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+  .color-row { display: flex; align-items: center; gap: 10px; }
   .color-row input[type="color"] {
     width: 44px; height: 38px;
     border: 1.5px solid var(--line);
@@ -544,19 +483,10 @@
     cursor: pointer;
     padding: 3px;
   }
-  .color-row input[type="text"] {
-    flex: 1;
-    font-family: var(--mono);
-    text-transform: uppercase;
-  }
+  .color-row input[type="text"] { flex: 1; font-family: var(--mono); text-transform: uppercase; }
 
-  /* Style buttons */
-  .style-toggles {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-  }
-  .style-toggles button {
+  .style-toggles, .align-toggles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .style-toggles button, .align-toggles button {
     padding: 9px;
     font-size: 13px;
     font-weight: 600;
@@ -565,57 +495,42 @@
     background: var(--bg-elev);
     color: var(--ink-soft);
     transition: all .15s;
+    display: grid; place-items: center;
   }
-  .style-toggles button:hover {
+  .style-toggles button:hover, .align-toggles button:hover {
     border-color: var(--gold);
     color: var(--ink);
   }
-  .style-toggles button.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
-  .align-toggles {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-  }
-  .align-toggles button {
-    padding: 9px;
-    border: 1.5px solid var(--line);
-    border-radius: var(--radius-sm);
-    background: var(--bg-elev);
-    color: var(--ink-soft);
-    display: grid; place-items: center;
-    transition: all .15s;
-  }
-  .align-toggles button:hover { border-color: var(--gold); }
-  .align-toggles button.active {
+  .style-toggles button.active, .align-toggles button.active {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
   }
 
-  /* Field list */
-  .field-list {
-    margin-top: 18px;
-    padding-top: 16px;
-    border-top: 1px dashed var(--line);
+  .pos-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    background: var(--bg-elev);
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--line);
   }
+
+  .field-list { margin-top: 18px; padding-top: 16px; border-top: 1px dashed var(--line); }
   .field-list h5 {
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 11px; font-weight: 700;
     text-transform: uppercase;
     color: var(--ink-mute);
     letter-spacing: .8px;
     margin: 0 0 10px;
   }
   .field-chip {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 8px 11px;
-    margin-bottom: 5px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 11px; margin-bottom: 5px;
     background: var(--bg-elev);
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
@@ -654,8 +569,16 @@
     line-height: 1.5;
   }
   .design-help b { color: var(--ink); font-weight: 700; }
+  .design-help code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--bg-elev);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--accent);
+  }
 
-  /* ============== Step 3: Data ============== */
+  /* Step 3 */
   .data-layout { max-width: 760px; margin: 0 auto; }
   .csv-info {
     background: var(--bg);
@@ -681,11 +604,7 @@
     overflow: auto;
     max-height: 360px;
   }
-  table.data {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-  }
+  table.data { width: 100%; border-collapse: collapse; font-size: 13px; }
   table.data th {
     background: var(--bg);
     padding: 10px 14px;
@@ -698,11 +617,7 @@
     border-bottom: 1px solid var(--line);
     position: sticky; top: 0;
   }
-  table.data td {
-    padding: 10px 14px;
-    border-bottom: 1px solid var(--line-soft);
-    color: var(--ink);
-  }
+  table.data td { padding: 10px 14px; border-bottom: 1px solid var(--line-soft); color: var(--ink); }
   table.data tr:last-child td { border-bottom: none; }
   table.data tr:hover td { background: var(--bg); }
 
@@ -728,20 +643,9 @@
     color: var(--accent);
     font-weight: 600;
   }
-  .mapping-row .status {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 3px 8px;
-    border-radius: 999px;
-  }
-  .mapping-row .status.match {
-    background: rgba(39,121,90,.12);
-    color: var(--success);
-  }
-  .mapping-row .status.miss {
-    background: rgba(192,57,43,.12);
-    color: var(--danger);
-  }
+  .mapping-row .status { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px; }
+  .mapping-row .status.match { background: rgba(39,121,90,.12); color: var(--success); }
+  .mapping-row .status.miss { background: rgba(192,57,43,.12); color: var(--danger); }
 
   .filename-config {
     margin-top: 18px;
@@ -771,7 +675,7 @@
   }
   .filename-config select:focus { border-color: var(--gold); }
 
-  /* ============== Step 4: Generate ============== */
+  /* Step 4 */
   .generate-layout { text-align: center; max-width: 600px; margin: 0 auto; }
   .summary-grid {
     display: grid;
@@ -823,7 +727,6 @@
     margin-top: 8px;
   }
 
-  /* ============== Buttons ============== */
   .nav-bar {
     display: flex;
     justify-content: space-between;
@@ -850,41 +753,22 @@
     transform: translateY(-1px);
     box-shadow: var(--shadow-sm);
   }
-  .btn-primary {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #fff;
-  }
+  .btn-primary { background: var(--accent); border-color: var(--accent); color: #fff; }
   .btn-primary:hover:not(:disabled) {
     background: #131c33;
     border-color: #131c33;
     box-shadow: var(--shadow-md);
   }
-  .btn-gold {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: #fff;
-  }
+  .btn-gold { background: var(--gold); border-color: var(--gold); color: #fff; }
   .btn-gold:hover:not(:disabled) {
     background: #b58832;
     border-color: #b58832;
     box-shadow: var(--shadow-md);
   }
-  .btn:disabled {
-    opacity: .5;
-    cursor: not-allowed;
-  }
-  .btn-ghost {
-    border-color: transparent;
-    background: transparent;
-    color: var(--ink-soft);
-  }
-  .btn-ghost:hover:not(:disabled) {
-    background: var(--bg);
-    color: var(--ink);
-  }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .btn-ghost { border-color: transparent; background: transparent; color: var(--ink-soft); }
+  .btn-ghost:hover:not(:disabled) { background: var(--bg); color: var(--ink); }
 
-  /* Toast */
   .toast {
     position: fixed;
     bottom: 24px; left: 50%;
@@ -905,7 +789,6 @@
   .toast.error { background: var(--danger); }
   .toast.success { background: var(--success); }
 
-  /* Footer */
   footer.site {
     text-align: center;
     padding: 30px 16px 40px;
@@ -920,16 +803,12 @@
     border-bottom: 1px solid var(--gold);
   }
 
-  /* Step animations */
-  .step-panel {
-    animation: panelIn .35s cubic-bezier(.2,.7,.2,1);
-  }
+  .step-panel { animation: panelIn .35s cubic-bezier(.2,.7,.2,1); }
   @keyframes panelIn {
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Responsive */
   @media (max-width: 900px) {
     .design-layout { grid-template-columns: 1fr; }
     .props { position: static; }
@@ -965,8 +844,7 @@
   </div>
 </header>
 
-<!-- Stepper -->
-<div class="stepper" id="stepper">
+<div class="stepper">
   <div class="step-item active" data-step="1">
     <div class="circle">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -991,7 +869,6 @@
 
 <main>
   <div class="card">
-    <!-- ===== STEP 1 ===== -->
     <section id="step-1" class="step-panel card-pad">
       <h2 class="panel-title">Upload Certificate Template</h2>
       <p class="panel-sub">Supported formats: PNG, JPG, WEBP</p>
@@ -1015,18 +892,16 @@
       </div>
     </section>
 
-    <!-- ===== STEP 2 ===== -->
     <section id="step-2" class="step-panel card-pad" hidden>
       <h2 class="panel-title">Design the Layout</h2>
       <p class="panel-sub">Click and drag on the certificate to define each text field</p>
-
       <div class="design-layout">
-        <div class="canvas-wrap" id="canvasWrap">
+        <div class="canvas-wrap">
           <div class="canvas-stage" id="canvasStage">
             <img id="designImg" alt="Template">
           </div>
         </div>
-        <aside class="props" id="propsPanel">
+        <aside class="props">
           <h4>Field Properties</h4>
           <p class="sub">Configure the selected field</p>
           <div id="propsBody">
@@ -1040,27 +915,23 @@
             <div id="fieldChips"></div>
           </div>
           <div class="design-help">
-            <b>Tip:</b> Name fields like <code style="font-family:var(--mono);font-size:11px">name</code>, <code style="font-family:var(--mono);font-size:11px">course</code>, <code style="font-family:var(--mono);font-size:11px">date</code>. They must match your CSV column headers exactly.
+            <b>Tip:</b> Name fields like <code>name</code>, <code>course</code>, <code>date</code>. They must match your CSV column headers exactly. Make boxes wide enough for the longest entry.
           </div>
         </aside>
       </div>
-
       <div class="nav-bar">
         <button class="btn" id="back2">← Back</button>
         <button class="btn btn-primary" id="next2" disabled>Continue to Data →</button>
       </div>
     </section>
 
-    <!-- ===== STEP 3 ===== -->
     <section id="step-3" class="step-panel card-pad" hidden>
       <h2 class="panel-title">Upload Recipient Data</h2>
       <p class="panel-sub">A CSV file containing rows of recipient details</p>
-
       <div class="data-layout">
         <div class="csv-info">
           <p>Your CSV column headers must match the field names you defined. Example: <code>name,course,date</code></p>
         </div>
-
         <label class="dropzone" id="csvDrop">
           <input type="file" id="csvInput" accept=".csv,text/csv">
           <div class="upload-icon">
@@ -1072,44 +943,36 @@
           <h3>Drop CSV file here</h3>
           <p>or click to browse</p>
         </label>
-
         <div id="csvResult" hidden>
           <h4 style="font-family:var(--display);font-size:16px;margin:24px 0 10px">Field Mapping</h4>
           <div class="mapping-grid" id="mappingGrid"></div>
-
-          <div class="filename-config" id="filenameConfig">
+          <div class="filename-config">
             <label>Filename column (used to name each PDF)</label>
             <select id="filenameSelect"></select>
           </div>
-
           <h4 style="font-family:var(--display);font-size:16px;margin:24px 0 10px">Data Preview <span id="rowCount" style="color:var(--ink-mute);font-weight:400;font-size:13px"></span></h4>
           <div class="data-table-wrap">
             <table class="data" id="dataTable"></table>
           </div>
         </div>
       </div>
-
       <div class="nav-bar">
         <button class="btn" id="back3">← Back</button>
         <button class="btn btn-primary" id="next3" disabled>Continue to Generate →</button>
       </div>
     </section>
 
-    <!-- ===== STEP 4 ===== -->
     <section id="step-4" class="step-panel card-pad" hidden>
       <h2 class="panel-title">Generate Certificates</h2>
       <p class="panel-sub">Review and create individual PDFs bundled in a single ZIP</p>
-
       <div class="generate-layout">
         <div class="summary-grid">
           <div class="summary-card"><div class="num" id="sumFields">0</div><div class="lbl">Fields</div></div>
           <div class="summary-card"><div class="num" id="sumRows">0</div><div class="lbl">Recipients</div></div>
           <div class="summary-card"><div class="num" id="sumPdfs">0</div><div class="lbl">PDFs</div></div>
         </div>
-
         <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
         <div class="progress-text" id="progressText">Ready to generate</div>
-
         <div style="margin-top:24px">
           <button class="btn btn-gold" id="generateBtn" style="padding:14px 32px;font-size:15px">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1119,13 +982,11 @@
           </button>
         </div>
       </div>
-
       <div class="nav-bar">
         <button class="btn" id="back4">← Back</button>
         <button class="btn btn-ghost" id="startOver">Start Over</button>
       </div>
     </section>
-
   </div>
 </main>
 
@@ -1136,41 +997,32 @@
 <div class="toast" id="toast"></div>
 
 <script>
-/* ============== State ============== */
 const state = {
-  step: 1,
-  imageDataUrl: null,
-  imageNaturalWidth: 0,
-  imageNaturalHeight: 0,
+  step: 1, imageDataUrl: null,
+  imageNaturalWidth: 0, imageNaturalHeight: 0,
   imageType: 'image/png',
-  fields: [],          // {id,name,x,y,width,height, fontFamily,fontSize,color,bold,italic,align}
-  selectedFieldId: null,
-  csvData: null,       // [{col:val,...}]
-  csvHeaders: [],
-  filenameColumn: null,
+  fields: [], selectedFieldId: null,
+  csvData: null, csvHeaders: [], filenameColumn: null,
 };
 let fieldCounter = 0;
-
 const FONT_FAMILIES = [
   { name: 'Helvetica', value: 'helvetica' },
   { name: 'Times', value: 'times' },
   { name: 'Courier', value: 'courier' },
 ];
-
-/* ============== Local Storage ============== */
 const LS_KEY = 'certforge.v1';
+
 function saveState() {
   try {
-    const persist = {
+    localStorage.setItem(LS_KEY, JSON.stringify({
       imageDataUrl: state.imageDataUrl,
       imageNaturalWidth: state.imageNaturalWidth,
       imageNaturalHeight: state.imageNaturalHeight,
       imageType: state.imageType,
       fields: state.fields,
       step: state.step,
-    };
-    localStorage.setItem(LS_KEY, JSON.stringify(persist));
-  } catch (e) { /* quota - ignore */ }
+    }));
+  } catch (e) {}
 }
 function loadState() {
   try {
@@ -1183,46 +1035,38 @@ function loadState() {
       state.imageNaturalHeight = data.imageNaturalHeight || 0;
       state.imageType = data.imageType || 'image/png';
       state.fields = data.fields || [];
-      fieldCounter = state.fields.reduce((max, f) => {
-        const n = parseInt((f.id||'').replace(/\D/g,''),10) || 0;
-        return Math.max(max, n);
-      }, 0);
-      // Restore preview
+      fieldCounter = state.fields.reduce((m, f) => Math.max(m, parseInt((f.id||'').replace(/\D/g,''),10)||0), 0);
       previewImg.src = state.imageDataUrl;
       previewMeta.textContent = `${state.imageNaturalWidth} × ${state.imageNaturalHeight}px`;
       previewWrap.hidden = false;
       next1.disabled = false;
     }
-  } catch (e) { /* corrupted - ignore */ }
+  } catch (e) {}
 }
 
-/* ============== DOM refs ============== */
 const $ = id => document.getElementById(id);
 const dropzone = $('dropzone'), fileInput = $('fileInput');
 const previewWrap = $('previewWrap'), previewImg = $('previewImg'), previewMeta = $('previewMeta');
 const next1 = $('next1'), resetBtn = $('resetBtn');
-const stepper = $('stepper');
-
-const canvasWrap = $('canvasWrap'), canvasStage = $('canvasStage'), designImg = $('designImg');
+const canvasStage = $('canvasStage'), designImg = $('designImg');
 const propsBody = $('propsBody'), fieldList = $('fieldList'), fieldCount = $('fieldCount'), fieldChips = $('fieldChips');
 const back2 = $('back2'), next2 = $('next2');
-
 const csvDrop = $('csvDrop'), csvInput = $('csvInput');
 const csvResult = $('csvResult'), mappingGrid = $('mappingGrid');
 const filenameSelect = $('filenameSelect'), dataTable = $('dataTable'), rowCount = $('rowCount');
 const back3 = $('back3'), next3 = $('next3');
-
 const sumFields = $('sumFields'), sumRows = $('sumRows'), sumPdfs = $('sumPdfs');
 const progressBar = $('progressBar'), progressText = $('progressText');
 const generateBtn = $('generateBtn'), back4 = $('back4'), startOver = $('startOver');
-
 const toast = $('toast');
 
-/* ============== Utilities ============== */
 function showToast(msg, type='') {
   toast.textContent = msg;
   toast.className = `toast show ${type}`;
   setTimeout(() => toast.className = 'toast', 2800);
+}
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function gotoStep(n) {
   state.step = n;
@@ -1231,21 +1075,19 @@ function gotoStep(n) {
     const sn = parseInt(el.dataset.step,10);
     el.classList.toggle('active', sn === n);
     el.classList.toggle('done', sn < n);
+    const c = el.querySelector('.circle');
     if (sn < n) {
-      el.querySelector('.circle').innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>';
+      c.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3.5L13 5"/></svg>';
+    } else if (sn === 1 && sn === n) {
+      c.innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3M8 3l-3 3M8 3l3 3M3 11v1a1 1 0 001 1h8a1 1 0 001-1v-1"/></svg>';
     } else {
-      el.querySelector('.circle').textContent = sn === 1
-        ? '' : sn;
-      if (sn === 1 && sn === n) {
-        el.querySelector('.circle').innerHTML = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 11V3M8 3l-3 3M8 3l3 3M3 11v1a1 1 0 001 1h8a1 1 0 001-1v-1"/></svg>';
-      }
+      c.textContent = sn;
     }
   });
   saveState();
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
-/* ============== Step 1: Upload ============== */
 function handleFile(file) {
   if (!file) return;
   if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
@@ -1271,14 +1113,15 @@ function handleFile(file) {
   };
   reader.readAsDataURL(file);
 }
-dropzone.addEventListener('click', () => fileInput.click());
+
+/* ======= BUG FIX 1: Single-click upload =======
+   The dropzone is a <label> wrapping the <input>, so clicking it ALREADY
+   opens the file dialog natively. We removed the extra JS click handler
+   that was opening it a second time and cancelling the first selection.
+   Now we only handle drag-and-drop in JS — clicks are pure native label behavior. */
 fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
-['dragover','dragenter'].forEach(ev => dropzone.addEventListener(ev, e => {
-  e.preventDefault(); dropzone.classList.add('dragover');
-}));
-['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => {
-  e.preventDefault(); dropzone.classList.remove('dragover');
-}));
+['dragover','dragenter'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.add('dragover'); }));
+['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
 dropzone.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
 
 resetBtn.addEventListener('click', () => {
@@ -1299,17 +1142,12 @@ next1.addEventListener('click', () => {
   const renderAll = () => { renderFields(); renderProps(); renderFieldList(); };
   designImg.onload = renderAll;
   designImg.src = state.imageDataUrl;
-  // Handle cached image case (onload may not fire on second visit)
   if (designImg.complete && designImg.naturalWidth) setTimeout(renderAll, 0);
   next2.disabled = state.fields.length === 0;
   gotoStep(2);
 });
 
-/* ============== Step 2: Design ============== */
-let drawing = null;     // {startX,startY,box}
-let dragging = null;    // {fieldId, offsetX, offsetY}
-let resizing = null;    // {fieldId, startX, startY, w, h}
-
+let drawing = null, dragging = null, resizing = null;
 function getStageScale() {
   if (!designImg.naturalWidth) return 1;
   return designImg.clientWidth / designImg.naturalWidth;
@@ -1317,10 +1155,7 @@ function getStageScale() {
 function imgCoords(e) {
   const rect = canvasStage.getBoundingClientRect();
   const scale = getStageScale();
-  return {
-    x: (e.clientX - rect.left) / scale,
-    y: (e.clientY - rect.top) / scale,
-  };
+  return { x: (e.clientX - rect.left) / scale, y: (e.clientY - rect.top) / scale };
 }
 
 canvasStage.addEventListener('mousedown', e => {
@@ -1332,7 +1167,7 @@ canvasStage.addEventListener('mousedown', e => {
     e.preventDefault();
     return;
   }
-  if (e.target.classList.contains('field-box') || e.target.closest('.field-box')) {
+  if (e.target.closest('.field-box')) {
     const box = e.target.closest('.field-box');
     const fid = box.dataset.id;
     selectField(fid);
@@ -1342,7 +1177,6 @@ canvasStage.addEventListener('mousedown', e => {
     e.preventDefault();
     return;
   }
-  // start drawing new
   const c = imgCoords(e);
   drawing = { startX: c.x, startY: c.y, currX: c.x, currY: c.y };
   selectField(null);
@@ -1370,7 +1204,7 @@ window.addEventListener('mousemove', e => {
   }
 });
 
-window.addEventListener('mouseup', e => {
+window.addEventListener('mouseup', () => {
   if (drawing) {
     const x = Math.min(drawing.startX, drawing.currX);
     const y = Math.min(drawing.startY, drawing.currY);
@@ -1385,9 +1219,7 @@ window.addEventListener('mouseup', e => {
         fontFamily: 'helvetica',
         fontSize: Math.max(14, Math.min(60, Math.round(h * 0.55))),
         color: '#1d2945',
-        bold: false,
-        italic: false,
-        align: 'center',
+        bold: false, italic: false, align: 'center',
       };
       state.fields.push(newField);
       selectField(newField.id);
@@ -1401,12 +1233,10 @@ window.addEventListener('mouseup', e => {
     next2.disabled = state.fields.length === 0;
   }
   if (dragging || resizing) saveState();
-  dragging = null;
-  resizing = null;
+  dragging = null; resizing = null;
 });
 
 function renderDrawingPreview() {
-  // remove existing temp
   const existing = document.getElementById('tempDrawBox');
   if (existing) existing.remove();
   if (!drawing) return;
@@ -1426,7 +1256,6 @@ function renderDrawingPreview() {
 }
 
 function renderFields() {
-  // remove all field-boxes
   canvasStage.querySelectorAll('.field-box').forEach(el => el.remove());
   const scale = getStageScale();
   state.fields.forEach(f => {
@@ -1441,7 +1270,7 @@ function renderFields() {
       <span class="label">${escapeHtml(f.name)}</span>
       <span class="preview-text" style="
         color:${f.color};
-        font-family:${f.fontFamily==='times'?'Times':f.fontFamily==='courier'?'Courier':'Helvetica'},serif;
+        font-family:${f.fontFamily==='times'?'Times':f.fontFamily==='courier'?'Courier':'Helvetica'},sans-serif;
         font-size:${f.fontSize*scale}px;
         font-weight:${f.bold?'700':'400'};
         font-style:${f.italic?'italic':'normal'};
@@ -1454,17 +1283,9 @@ function renderFields() {
   });
 }
 
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, c => ({
-    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-  }[c]));
-}
-
 function selectField(id) {
   state.selectedFieldId = id;
-  renderFields();
-  renderProps();
-  renderFieldList();
+  renderFields(); renderProps(); renderFieldList();
 }
 
 function renderProps() {
@@ -1479,7 +1300,7 @@ function renderProps() {
   }
   propsBody.innerHTML = `
     <div class="prop-row">
-      <label>Field name <span class="value-display" style="font-family:var(--mono)">{{${escapeHtml(f.name)}}}</span></label>
+      <label>Field name <span class="value-display">{{${escapeHtml(f.name)}}}</span></label>
       <input type="text" id="pName" value="${escapeHtml(f.name)}" placeholder="e.g. name, course, date">
     </div>
     <div class="prop-row">
@@ -1526,18 +1347,17 @@ function renderProps() {
     </div>
     <div class="prop-row">
       <label>Position &amp; Size</label>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-family:var(--mono);font-size:11.5px;color:var(--ink-mute)">
+      <div class="pos-grid">
         <span>X: ${Math.round(f.x)}</span>
         <span>Y: ${Math.round(f.y)}</span>
         <span>W: ${Math.round(f.width)}</span>
         <span>H: ${Math.round(f.height)}</span>
       </div>
     </div>
-    <button class="btn" id="pDelete" style="width:100%;color:var(--danger);border-color:rgba(192,57,43,.25);margin-top:6px">
+    <button class="btn" id="pDelete" style="width:100%;color:var(--danger);border-color:rgba(192,57,43,.25);margin-top:6px;justify-content:center">
       Delete this field
     </button>
   `;
-  // Bind events
   $('pName').addEventListener('input', e => { f.name = e.target.value.trim() || f.name; renderFields(); renderFieldList(); saveState(); });
   $('pFont').addEventListener('change', e => { f.fontFamily = e.target.value; renderFields(); saveState(); });
 
@@ -1561,14 +1381,12 @@ function renderProps() {
     renderFields(); saveState();
   });
   colorHex.addEventListener('input', e => {
-    const v = e.target.value;
-    if (/^#[0-9a-fA-F]{6}$/.test(v)) {
-      f.color = v;
-      colorPicker.value = v;
+    if (/^#[0-9a-fA-F]{6}$/.test(e.target.value)) {
+      f.color = e.target.value;
+      colorPicker.value = e.target.value;
       renderFields(); saveState();
     }
   });
-
   $('pBold').addEventListener('click', () => { f.bold = !f.bold; renderProps(); renderFields(); saveState(); });
   $('pItalic').addEventListener('click', () => { f.italic = !f.italic; renderProps(); renderFields(); saveState(); });
   $('pNormal').addEventListener('click', () => { f.bold = false; f.italic = false; renderProps(); renderFields(); saveState(); });
@@ -1616,7 +1434,6 @@ function renderFieldList() {
 window.addEventListener('resize', () => { if (state.step === 2) renderFields(); });
 back2.addEventListener('click', () => gotoStep(1));
 next2.addEventListener('click', () => {
-  // names must be unique and non-empty
   const names = state.fields.map(f => f.name.trim());
   if (names.some(n => !n)) { showToast('Every field needs a name', 'error'); return; }
   if (new Set(names).size !== names.length) { showToast('Field names must be unique', 'error'); return; }
@@ -1624,33 +1441,21 @@ next2.addEventListener('click', () => {
   if (state.csvData) renderCsv();
 });
 
-/* ============== Step 3: Data ============== */
-csvDrop.addEventListener('click', () => csvInput.click());
+/* CSV upload — same single-click fix */
 csvInput.addEventListener('change', e => handleCsv(e.target.files[0]));
-['dragover','dragenter'].forEach(ev => csvDrop.addEventListener(ev, e => {
-  e.preventDefault(); csvDrop.classList.add('dragover');
-}));
-['dragleave','drop'].forEach(ev => csvDrop.addEventListener(ev, e => {
-  e.preventDefault(); csvDrop.classList.remove('dragover');
-}));
+['dragover','dragenter'].forEach(ev => csvDrop.addEventListener(ev, e => { e.preventDefault(); csvDrop.classList.add('dragover'); }));
+['dragleave','drop'].forEach(ev => csvDrop.addEventListener(ev, e => { e.preventDefault(); csvDrop.classList.remove('dragover'); }));
 csvDrop.addEventListener('drop', e => handleCsv(e.dataTransfer.files[0]));
 
 function handleCsv(file) {
   if (!file) return;
   Papa.parse(file, {
-    header: true,
-    skipEmptyLines: true,
+    header: true, skipEmptyLines: true,
     complete: results => {
-      if (results.errors.length) {
-        showToast('CSV parse error: ' + results.errors[0].message, 'error');
-        return;
-      }
+      if (results.errors.length) { showToast('CSV parse error: ' + results.errors[0].message, 'error'); return; }
       state.csvData = results.data;
       state.csvHeaders = results.meta.fields || [];
-      if (!state.csvData.length) {
-        showToast('CSV has no data rows', 'error');
-        return;
-      }
+      if (!state.csvData.length) { showToast('CSV has no data rows', 'error'); return; }
       renderCsv();
       showToast(`Loaded ${state.csvData.length} recipients`, 'success');
     }
@@ -1660,29 +1465,22 @@ function handleCsv(file) {
 function renderCsv() {
   if (!state.csvData) return;
   csvResult.hidden = false;
-
-  // Field mapping
   mappingGrid.innerHTML = state.fields.map(f => {
     const match = state.csvHeaders.includes(f.name);
     return `
       <div class="mapping-row">
         <span class="field-name">{{${escapeHtml(f.name)}}}</span>
         <span class="status ${match?'match':'miss'}">${match?'✓ matched':'✗ missing'}</span>
-      </div>
-    `;
+      </div>`;
   }).join('');
-
-  // Filename selector
   filenameSelect.innerHTML = state.csvHeaders.map(h => `<option value="${escapeHtml(h)}">${escapeHtml(h)}</option>`).join('');
-  // Default to "name" if exists, else first matching field, else first column
   const preferred = state.csvHeaders.find(h => h.toLowerCase() === 'name')
     || state.fields.map(f=>f.name).find(n => state.csvHeaders.includes(n))
     || state.csvHeaders[0];
   filenameSelect.value = preferred;
   state.filenameColumn = preferred;
-  filenameSelect.addEventListener('change', e => state.filenameColumn = e.target.value);
+  filenameSelect.onchange = e => state.filenameColumn = e.target.value;
 
-  // Preview table (first 8 rows)
   const previewRows = state.csvData.slice(0, 8);
   dataTable.innerHTML = `
     <thead><tr>${state.csvHeaders.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead>
@@ -1690,7 +1488,6 @@ function renderCsv() {
   `;
   rowCount.textContent = `(showing ${previewRows.length} of ${state.csvData.length})`;
 
-  // Enable next if at least one match
   const allMatched = state.fields.every(f => state.csvHeaders.includes(f.name));
   next3.disabled = !allMatched;
   if (!allMatched) showToast('Some field names don\'t match CSV headers', 'error');
@@ -1704,7 +1501,6 @@ next3.addEventListener('click', () => {
   gotoStep(4);
 });
 
-/* ============== Step 4: Generate ============== */
 back4.addEventListener('click', () => gotoStep(3));
 startOver.addEventListener('click', () => {
   if (!confirm('Start over with a new template?')) return;
@@ -1714,122 +1510,78 @@ startOver.addEventListener('click', () => {
 
 generateBtn.addEventListener('click', async () => {
   generateBtn.disabled = true;
+  const origHtml = generateBtn.innerHTML;
   generateBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Generating...';
-
   try {
     const zip = new JSZip();
     const { jsPDF } = window.jspdf;
     const total = state.csvData.length;
     const usedNames = new Map();
-
     for (let i = 0; i < total; i++) {
       const row = state.csvData[i];
-
-      // Build PDF in image's native pixel dimensions
       const orientation = state.imageNaturalWidth >= state.imageNaturalHeight ? 'l' : 'p';
       const pdf = new jsPDF({
-        orientation,
-        unit: 'px',
+        orientation, unit: 'px',
         format: [state.imageNaturalWidth, state.imageNaturalHeight],
         hotfixes: ['px_scaling']
       });
-
-      // Add image as background — match exact dimensions
-      const imgFmt = state.imageType === 'image/png' ? 'PNG'
-        : state.imageType === 'image/webp' ? 'WEBP' : 'JPEG';
+      const imgFmt = state.imageType === 'image/png' ? 'PNG' : state.imageType === 'image/webp' ? 'WEBP' : 'JPEG';
       pdf.addImage(state.imageDataUrl, imgFmt, 0, 0, state.imageNaturalWidth, state.imageNaturalHeight);
 
-      // Add fields
       for (const f of state.fields) {
         const text = String(row[f.name] || '').trim();
         if (!text) continue;
 
-        // Set font
+        // Set font weight
         let weight = 'normal';
         if (f.bold && f.italic) weight = 'bolditalic';
         else if (f.bold) weight = 'bold';
         else if (f.italic) weight = 'italic';
-        try {
-          pdf.setFont(f.fontFamily, weight);
-        } catch (e) {
-          pdf.setFont(f.fontFamily, 'normal');
-        }
+        try { pdf.setFont(f.fontFamily, weight); } catch (e) { pdf.setFont(f.fontFamily, 'normal'); }
+
+        /* ======= EXACT FONT SIZE — no auto-shrink, no truncation =======
+           Whatever size the user sets in Properties is rendered EXACTLY in
+           the PDF. Field 1 at 41px and Field 2 at 41px will both render at
+           exactly 41. The user has full control via the size slider. */
         pdf.setFontSize(f.fontSize);
 
         // Color
         const rgb = hexToRgb(f.color);
         pdf.setTextColor(rgb.r, rgb.g, rgb.b);
 
-        // Calculate baseline position (jsPDF text Y is baseline by default)
-        // We center vertically inside the box
-        const textHeight = f.fontSize; // approx
-        const baselineY = f.y + (f.height + textHeight*0.72) / 2;
+        // Vertical centering using the exact font size the user set
+        const baselineY = f.y + (f.height + f.fontSize * 0.72) / 2;
 
-        let textX;
-        const opts = { baseline: 'alphabetic' };
-        if (f.align === 'left') {
-          textX = f.x + 2;
-          opts.align = 'left';
-        } else if (f.align === 'right') {
-          textX = f.x + f.width - 2;
-          opts.align = 'right';
-        } else {
-          textX = f.x + f.width/2;
-          opts.align = 'center';
-        }
+        let textX, opts = { baseline: 'alphabetic' };
+        if (f.align === 'left') { textX = f.x + 2; opts.align = 'left'; }
+        else if (f.align === 'right') { textX = f.x + f.width - 2; opts.align = 'right'; }
+        else { textX = f.x + f.width/2; opts.align = 'center'; }
 
-        // truncate if too wide (simple ellipsis)
-        const maxWidth = f.width;
-        let renderText = text;
-        try {
-          let w = pdf.getTextWidth(renderText);
-          if (w > maxWidth) {
-            while (renderText.length > 1 && pdf.getTextWidth(renderText + '…') > maxWidth) {
-              renderText = renderText.slice(0,-1);
-            }
-            renderText += '…';
-          }
-        } catch(e) {}
-
-        pdf.text(renderText, textX, baselineY, opts);
+        // Render full text at the exact size — never resized, never truncated
+        pdf.text(text, textX, baselineY, opts);
       }
 
-      // Determine filename
       const rawName = String(row[state.filenameColumn] || `certificate_${i+1}`).trim() || `certificate_${i+1}`;
       let safe = rawName.replace(/[<>:"/\\|?*\x00-\x1f]/g,'').replace(/\s+/g,'_').slice(0,80);
-      // Dedup
       const count = (usedNames.get(safe) || 0) + 1;
       usedNames.set(safe, count);
       const finalName = count > 1 ? `${safe}_${count}.pdf` : `${safe}.pdf`;
-
-      // Add to zip
-      const pdfBlob = pdf.output('arraybuffer');
-      zip.file(finalName, pdfBlob);
-
-      // Update progress
+      zip.file(finalName, pdf.output('arraybuffer'));
       const pct = ((i+1)/total)*100;
       progressBar.style.width = pct + '%';
       progressText.textContent = `Generating ${i+1} of ${total} — ${finalName}`;
-      // Yield to UI
       if (i % 5 === 0) await new Promise(r => setTimeout(r, 0));
     }
-
     progressText.textContent = 'Bundling into ZIP...';
     const blob = await zip.generateAsync({ type: 'blob' }, meta => {
       progressText.textContent = `Compressing... ${Math.round(meta.percent)}%`;
     });
-
-    // Download
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    const stamp = new Date().toISOString().slice(0,10);
     a.href = url;
-    a.download = `certificates_${stamp}.zip`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    a.download = `certificates_${new Date().toISOString().slice(0,10)}.zip`;
+    document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2000);
-
     progressText.textContent = `✓ Generated ${total} certificates`;
     showToast(`Successfully generated ${total} PDFs!`, 'success');
   } catch (err) {
@@ -1838,12 +1590,7 @@ generateBtn.addEventListener('click', async () => {
     progressText.textContent = 'Generation failed';
   } finally {
     generateBtn.disabled = false;
-    generateBtn.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
-      </svg>
-      Generate &amp; Download ZIP
-    `;
+    generateBtn.innerHTML = origHtml;
   }
 });
 
@@ -1852,15 +1599,12 @@ function hexToRgb(hex) {
   return m ? { r: parseInt(m[1],16), g: parseInt(m[2],16), b: parseInt(m[3],16) } : { r:0,g:0,b:0 };
 }
 
-/* Spin keyframe */
 const styleTag = document.createElement('style');
 styleTag.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(styleTag);
 
-/* ============== Init ============== */
 loadState();
 gotoStep(1);
 </script>
-
 </body>
 </html>

@@ -1,0 +1,2419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CertForge — Bulk Certificate Generator</title>
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- Libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<style>
+:root {
+  --bg: #faf8f3;
+  --bg-grad: radial-gradient(ellipse at top, #fdfcf8 0%, #f5f2eb 100%);
+  --surface: #ffffff;
+  --surface-soft: #fbfaf6;
+  --text: #0d0d0d;
+  --text-muted: #6b6b6b;
+  --text-faint: #a0a09a;
+  --border: #ebe8e1;
+  --border-strong: #d5d1c8;
+  --accent: #0d0d0d;
+  --accent-soft: #1f1f1f;
+  --accent-tint: #f0eee8;
+  --danger: #dc2626;
+  --danger-soft: #fef2f2;
+  --danger-border: #fecaca;
+  --info: #2563eb;
+  --info-soft: #eff6ff;
+  --info-border: #dbeafe;
+  --success: #059669;
+  --shadow-sm: 0 1px 2px rgba(13, 13, 13, 0.04);
+  --shadow-md: 0 4px 12px rgba(13, 13, 13, 0.06), 0 1px 3px rgba(13, 13, 13, 0.04);
+  --shadow-lg: 0 12px 32px rgba(13, 13, 13, 0.08), 0 4px 12px rgba(13, 13, 13, 0.05);
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 16px;
+  --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  font-family: 'Manrope', system-ui, sans-serif;
+  background: var(--bg);
+  background-image: var(--bg-grad);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, select, textarea { font-family: inherit; }
+
+/* ===== HEADER ===== */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 40px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brand-mark {
+  font-family: 'Instrument Serif', serif;
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.brand-mark em {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.brand-tag {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  font-weight: 500;
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+
+.byline {
+  font-size: 12px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.byline-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--success);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.byline em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* ===== STEP INDICATOR ===== */
+.steps-nav {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  padding: 36px 20px 24px;
+  position: relative;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+  width: 130px;
+  cursor: default;
+  transition: var(--transition);
+}
+
+.step-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 22px;
+  left: calc(50% + 30px);
+  right: calc(-50% + 30px);
+  height: 1px;
+  background: var(--border-strong);
+}
+
+.step-item.completed:not(:last-child)::after {
+  background: var(--accent);
+}
+
+.step-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  color: var(--text-faint);
+  transition: var(--transition);
+  position: relative;
+  z-index: 2;
+}
+
+.step-icon svg { width: 18px; height: 18px; }
+
+.step-item.active .step-icon {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: var(--shadow-md);
+  transform: scale(1.05);
+}
+
+.step-item.completed .step-icon {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+.step-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-faint);
+  transition: var(--transition);
+}
+
+.step-sub {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-top: -6px;
+  transition: var(--transition);
+}
+
+.step-item.active .step-label,
+.step-item.completed .step-label { color: var(--text); }
+
+.step-item.active .step-sub { color: var(--text-muted); }
+
+/* ===== MAIN ===== */
+main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 32px 80px;
+}
+
+.panel {
+  display: none;
+  animation: fadeUp 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.panel.active { display: block; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.panel-title {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.panel-title h1 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+
+.panel-title h1 em {
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+.panel-subtitle {
+  color: var(--text-muted);
+  font-size: 14px;
+  margin-bottom: 36px;
+  text-align: center;
+}
+
+/* ===== UPLOAD STEP ===== */
+.upload-zone {
+  max-width: 760px;
+  margin: 0 auto;
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 80px 40px;
+  text-align: center;
+  background: var(--surface);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.upload-zone:hover {
+  border-color: var(--accent);
+  background: var(--surface-soft);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.upload-zone.drag-over {
+  border-color: var(--accent);
+  background: var(--accent-tint);
+  border-style: solid;
+}
+
+.upload-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--accent-tint);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.upload-zone:hover .upload-icon {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.upload-icon svg { width: 22px; height: 22px; }
+
+.upload-title {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.upload-hint {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.upload-hint span {
+  color: var(--info);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ===== DESIGN STEP ===== */
+.design-grid {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  align-items: start;
+}
+
+.canvas-area {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.canvas-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.canvas-toolbar .hint {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.canvas-toolbar .hint svg { width: 14px; height: 14px; }
+
+.canvas-toolbar .field-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--accent-tint);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.image-stage {
+  position: relative;
+  width: 100%;
+  user-select: none;
+  background: repeating-conic-gradient(#f5f3ee 0% 25%, #fbfaf6 0% 50%) 50% / 16px 16px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: crosshair;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-stage img {
+  width: 100%;
+  height: auto;
+  display: block;
+  pointer-events: none;
+}
+
+.boxes-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  pointer-events: none;
+}
+
+.field-box {
+  position: absolute;
+  border: 1.5px solid var(--info);
+  background: rgba(37, 99, 235, 0.08);
+  box-sizing: border-box;
+  pointer-events: auto;
+  cursor: move;
+  transition: background 150ms;
+}
+
+.field-box:hover { background: rgba(37, 99, 235, 0.14); }
+
+.field-box.selected {
+  border-color: var(--accent);
+  background: rgba(13, 13, 13, 0.08);
+  box-shadow: 0 0 0 3px rgba(13, 13, 13, 0.08);
+}
+
+.field-box-label {
+  position: absolute;
+  top: -22px;
+  left: 0;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--info);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.02em;
+}
+
+.field-box.selected .field-box-label { background: var(--accent); }
+
+.resize-handle {
+  position: absolute;
+  width: 10px; height: 10px;
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: 2px;
+  z-index: 10;
+}
+
+.resize-handle.nw { top: -5px; left: -5px; cursor: nwse-resize; }
+.resize-handle.ne { top: -5px; right: -5px; cursor: nesw-resize; }
+.resize-handle.sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.resize-handle.se { bottom: -5px; right: -5px; cursor: nwse-resize; }
+
+.field-box:not(.selected) .resize-handle { display: none; }
+
+.empty-stage {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 60px 20px;
+  font-size: 14px;
+}
+
+/* ===== PROPERTIES PANEL ===== */
+.props-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 100px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.props-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.props-header h2 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.props-empty {
+  text-align: center;
+  padding: 60px 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.props-empty svg {
+  width: 32px; height: 32px;
+  color: var(--text-faint);
+  margin-bottom: 12px;
+}
+
+.field-list {
+  display: flex; flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.field-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.field-list-item:hover {
+  border-color: var(--border-strong);
+  background: var(--accent-tint);
+}
+
+.field-list-item.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+.field-list-item .swatch {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--info);
+}
+
+.field-list-item.active .swatch { background: white; }
+
+.field-list-name { flex: 1; margin-left: 8px; font-weight: 500; }
+
+.form-group { margin-bottom: 16px; }
+
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  font-size: 14px;
+  background: var(--surface);
+  color: var(--text);
+  transition: var(--transition);
+}
+
+.form-input:focus, .form-select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(13, 13, 13, 0.08);
+}
+
+.form-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6b6b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+.font-upload-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--info-soft);
+  color: var(--info);
+  border: 1px solid var(--info-border);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 8px;
+  transition: var(--transition);
+}
+
+.font-upload-btn:hover {
+  background: #dbeafe;
+  transform: translateY(-1px);
+}
+
+.font-upload-btn svg { width: 12px; height: 12px; }
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.color-input-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.color-input-wrap:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(13, 13, 13, 0.08);
+}
+
+.color-swatch {
+  width: 38px; height: 38px;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  background: var(--text);
+  position: relative;
+}
+
+.color-swatch input[type="color"] {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.color-hex {
+  border: none;
+  flex: 1;
+  padding: 9px 12px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  background: var(--surface);
+  outline: none;
+  text-transform: uppercase;
+}
+
+.color-edit-icon {
+  padding: 0 12px;
+  color: var(--text-muted);
+  display: flex; align-items: center;
+}
+
+.color-edit-icon svg { width: 14px; height: 14px; }
+
+.toggle-group {
+  display: flex;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.toggle-btn {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-radius: 6px;
+  transition: var(--transition);
+}
+
+.toggle-btn.active {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.position-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.pos-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.pos-input span {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.pos-input input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text);
+  width: 100%;
+}
+
+.delete-field-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 10px 14px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid var(--danger-border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: var(--transition);
+}
+
+.delete-field-btn:hover {
+  background: var(--danger);
+  color: white;
+  border-color: var(--danger);
+}
+
+.delete-field-btn svg { width: 14px; height: 14px; }
+
+/* ===== DATA STEP ===== */
+.data-grid {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.csv-zone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius);
+  padding: 36px 24px;
+  text-align: center;
+  background: var(--surface);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.csv-zone:hover {
+  border-color: var(--accent);
+  background: var(--surface-soft);
+}
+
+.csv-zone.has-file {
+  border-style: solid;
+  border-color: var(--success);
+  background: #f0fdf4;
+}
+
+.csv-zone-icon {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background: var(--accent-tint);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px;
+}
+
+.csv-zone.has-file .csv-zone-icon {
+  background: #dcfce7;
+  color: var(--success);
+}
+
+.csv-zone-icon svg { width: 18px; height: 18px; }
+
+.csv-zone-title { font-weight: 600; margin-bottom: 4px; }
+.csv-zone-hint { font-size: 13px; color: var(--text-muted); }
+
+.preview-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+
+.preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 16px;
+}
+
+.preview-header h3 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.preview-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.preview-table th {
+  background: var(--surface-soft);
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.preview-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.preview-table tr:last-child td { border-bottom: none; }
+
+.preview-table-wrap {
+  overflow-x: auto;
+}
+
+.mapping-list {
+  display: flex; flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.mapping-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.mapping-field {
+  display: flex; align-items: center; gap: 8px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.mapping-field .swatch {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--info);
+}
+
+.mapping-arrow {
+  color: var(--text-faint);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+}
+
+.mapping-row select {
+  padding: 8px 12px;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  font-size: 13px;
+  background: var(--surface);
+}
+
+.mapping-row.unmatched {
+  background: #fff7ed;
+  border-color: #fed7aa;
+}
+
+/* ===== GENERATE STEP ===== */
+.generate-grid {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: 24px;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.stat-item .stat-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.stat-item .stat-value {
+  font-family: 'Instrument Serif', serif;
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.stat-item .stat-value em {
+  font-size: 18px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.gen-action {
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.gen-btn {
+  padding: 14px 24px;
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: var(--transition);
+  box-shadow: var(--shadow-md);
+}
+
+.gen-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  background: #000;
+}
+
+.gen-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.gen-btn svg { width: 18px; height: 18px; }
+
+.progress-shell {
+  display: none;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.progress-shell.active { display: block; }
+
+.progress-info {
+  display: flex; justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.progress-info .label { color: var(--text-muted); }
+.progress-info .count { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+.progress-bar {
+  height: 8px;
+  background: var(--accent-tint);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  border-radius: 999px;
+  transition: width 200ms ease;
+  background-image: linear-gradient(90deg, var(--accent), #404040);
+}
+
+.success-card {
+  display: none;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #86efac;
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  text-align: center;
+}
+
+.success-card.show { display: block; animation: fadeUp 400ms; }
+
+.success-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--success);
+  color: white;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.success-icon svg { width: 24px; height: 24px; }
+
+.success-card h3 {
+  font-family: 'Instrument Serif', serif;
+  font-size: 28px;
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+
+.success-card p {
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+
+.download-btn {
+  padding: 12px 24px;
+  background: var(--accent);
+  color: white;
+  border-radius: var(--radius);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+  box-shadow: var(--shadow-md);
+}
+
+.download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.download-btn svg { width: 16px; height: 16px; }
+
+/* ===== NAVIGATION ===== */
+.nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-btn {
+  padding: 11px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+}
+
+.nav-btn.primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: var(--shadow-md);
+}
+
+.nav-btn.primary:hover:not(:disabled) {
+  background: #000;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lg);
+}
+
+.nav-btn.primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.nav-btn.secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-strong);
+}
+
+.nav-btn.secondary:hover {
+  color: var(--text);
+  border-color: var(--text-muted);
+}
+
+.nav-btn svg { width: 14px; height: 14px; }
+
+/* ===== TOAST ===== */
+.toast-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.toast {
+  padding: 12px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideIn 200ms;
+  min-width: 240px;
+}
+
+.toast.error { border-left: 3px solid var(--danger); }
+.toast.success { border-left: 3px solid var(--success); }
+.toast.info { border-left: 3px solid var(--info); }
+
+@keyframes slideIn {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* ===== FOOTER ===== */
+.app-footer {
+  text-align: center;
+  padding: 32px 24px;
+  font-size: 12px;
+  color: var(--text-faint);
+  border-top: 1px solid var(--border);
+  margin-top: 60px;
+}
+
+.app-footer em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1024px) {
+  .design-grid { grid-template-columns: 1fr; }
+  .props-panel { position: static; max-height: none; }
+}
+
+@media (max-width: 720px) {
+  .app-header { padding: 16px 20px; flex-direction: column; gap: 12px; align-items: flex-start; }
+  main { padding: 0 16px 60px; }
+  .panel-title h1 { font-size: 28px; }
+  .upload-zone { padding: 50px 24px; }
+  .steps-nav { gap: 0; padding: 24px 12px 16px; overflow-x: auto; }
+  .step-item { width: 90px; flex-shrink: 0; }
+  .step-label { font-size: 11px; }
+  .step-sub { display: none; }
+  .summary-stats { grid-template-columns: 1fr; gap: 12px; }
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-faint); }
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header class="app-header">
+  <div class="brand">
+    <div class="brand-mark">Cert<em>Forge</em></div>
+    <div class="brand-tag">Bulk Generator</div>
+  </div>
+  <div class="byline">
+    <span class="byline-dot"></span>
+    crafted by <em>Aayush Singh</em>
+  </div>
+</header>
+
+<!-- STEP INDICATOR -->
+<nav class="steps-nav">
+  <div class="step-item active" data-step="1">
+    <div class="step-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <div class="step-label">Upload</div>
+    <div class="step-sub">Choose Template</div>
+  </div>
+  <div class="step-item" data-step="2">
+    <div class="step-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6"/></svg>
+    </div>
+    <div class="step-label">Design</div>
+    <div class="step-sub">Select Areas</div>
+  </div>
+  <div class="step-item" data-step="3">
+    <div class="step-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5M3 12a9 3 0 0 0 18 0"/></svg>
+    </div>
+    <div class="step-label">Data</div>
+    <div class="step-sub">Enter Details</div>
+  </div>
+  <div class="step-item" data-step="4">
+    <div class="step-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>
+    </div>
+    <div class="step-label">Generate</div>
+    <div class="step-sub">Create PDFs</div>
+  </div>
+</nav>
+
+<main>
+
+<!-- ===== PANEL 1: UPLOAD ===== -->
+<section class="panel active" id="panel-1">
+  <div class="panel-title">
+    <h1>Upload Certificate <em>Template</em></h1>
+  </div>
+  <p class="panel-subtitle">Supported formats: PNG, JPG, WEBP</p>
+
+  <div class="upload-zone" id="upload-zone">
+    <input type="file" id="template-input" accept="image/png,image/jpeg,image/webp" hidden>
+    <div class="upload-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </div>
+    <div class="upload-title">Drag & drop your file here</div>
+    <div class="upload-hint">or <span>click to browse</span></div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="nav-btn secondary" id="reset-all">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg>
+      Reset All
+    </button>
+    <button class="nav-btn primary" id="to-step-2" disabled>
+      Continue
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ===== PANEL 2: DESIGN ===== -->
+<section class="panel" id="panel-2">
+  <div class="panel-title">
+    <h1>Draw Your <em>Fields</em></h1>
+  </div>
+  <p class="panel-subtitle">Click and drag on the template to mark where text should go</p>
+
+  <div class="design-grid">
+    <div class="canvas-area">
+      <div class="canvas-toolbar">
+        <div class="hint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Click and drag on the image to draw a field
+        </div>
+        <div class="field-count" id="field-count">0 fields</div>
+      </div>
+      <div class="image-stage" id="image-stage">
+        <div class="empty-stage" id="empty-stage" style="display:none;">No template loaded</div>
+        <img id="template-img" src="" alt="" style="display:none;">
+        <div class="boxes-overlay" id="boxes-overlay"></div>
+      </div>
+    </div>
+
+    <aside class="props-panel" id="props-panel">
+      <div class="props-header">
+        <h2>Properties</h2>
+      </div>
+
+      <div class="props-empty" id="props-empty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M3 9h6"/></svg>
+        <div>Draw a field on the<br>template to begin</div>
+      </div>
+
+      <div class="props-form" id="props-form" style="display:none;">
+        <div id="field-list" class="field-list"></div>
+
+        <div class="form-group">
+          <label class="form-label">Field Name</label>
+          <input type="text" class="form-input" id="prop-name" placeholder="e.g. Name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Font Family</label>
+          <select class="form-select" id="prop-font">
+            <option value="Arial">Arial</option>
+            <option value="Helvetica">Helvetica</option>
+            <option value="Georgia">Georgia</option>
+            <option value="'Times New Roman'">Times New Roman</option>
+            <option value="'Courier New'">Courier New</option>
+            <option value="Verdana">Verdana</option>
+            <option value="'Trebuchet MS'">Trebuchet MS</option>
+            <option value="'Manrope'">Manrope</option>
+            <option value="'Instrument Serif'">Instrument Serif</option>
+            <option value="'JetBrains Mono'">JetBrains Mono</option>
+          </select>
+          <input type="file" id="custom-font-input" accept=".ttf,.otf" hidden>
+          <button class="font-upload-btn" id="custom-font-btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload Custom Font (.ttf, .otf)
+          </button>
+        </div>
+
+        <div class="form-group">
+          <div class="row-2">
+            <div>
+              <label class="form-label">Font Size</label>
+              <input type="number" class="form-input" id="prop-size" min="6" max="500" value="48">
+            </div>
+            <div>
+              <label class="form-label">Color</label>
+              <div class="color-input-wrap">
+                <label class="color-swatch" id="color-swatch">
+                  <input type="color" id="prop-color" value="#000000">
+                </label>
+                <input type="text" class="color-hex" id="prop-color-hex" value="#000000" maxlength="7">
+                <span class="color-edit-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Font Weight</label>
+          <div class="toggle-group" id="weight-group">
+            <button class="toggle-btn active" data-value="normal">Normal</button>
+            <button class="toggle-btn" data-value="bold">Bold</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Alignment</label>
+          <div class="toggle-group" id="align-group">
+            <button class="toggle-btn" data-value="left">Left</button>
+            <button class="toggle-btn active" data-value="center">Center</button>
+            <button class="toggle-btn" data-value="right">Right</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Position (px)</label>
+          <div class="position-grid">
+            <div class="pos-input"><span>X:</span><input type="number" id="prop-x" step="1"></div>
+            <div class="pos-input"><span>Y:</span><input type="number" id="prop-y" step="1"></div>
+            <div class="pos-input"><span>W:</span><input type="number" id="prop-w" step="1"></div>
+            <div class="pos-input"><span>H:</span><input type="number" id="prop-h" step="1"></div>
+          </div>
+        </div>
+
+        <button class="delete-field-btn" id="delete-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></svg>
+          Delete Field
+        </button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="nav-bar">
+    <button class="nav-btn secondary" data-back="1">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+    <button class="nav-btn primary" id="to-step-3" disabled>
+      Continue
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ===== PANEL 3: DATA ===== -->
+<section class="panel" id="panel-3">
+  <div class="panel-title">
+    <h1>Upload <em>Data</em></h1>
+  </div>
+  <p class="panel-subtitle">Upload a CSV file with columns matching your field names</p>
+
+  <div class="data-grid">
+    <div class="csv-zone" id="csv-zone">
+      <input type="file" id="csv-input" accept=".csv,text/csv" hidden>
+      <div class="csv-zone-icon" id="csv-zone-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+      </div>
+      <div class="csv-zone-title" id="csv-zone-title">Drop your CSV file or click to browse</div>
+      <div class="csv-zone-hint" id="csv-zone-hint">First row should contain column headers</div>
+    </div>
+
+    <div class="preview-block" id="mapping-block" style="display:none;">
+      <div class="preview-header">
+        <h3>Field Mapping</h3>
+        <span class="preview-meta" id="mapping-meta">—</span>
+      </div>
+      <div class="mapping-list" id="mapping-list"></div>
+    </div>
+
+    <div class="preview-block" id="preview-block" style="display:none;">
+      <div class="preview-header">
+        <h3>Data Preview</h3>
+        <span class="preview-meta" id="preview-meta">—</span>
+      </div>
+      <div class="preview-table-wrap">
+        <table class="preview-table" id="preview-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="nav-btn secondary" data-back="2">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+    <button class="nav-btn primary" id="to-step-4" disabled>
+      Continue
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</section>
+
+<!-- ===== PANEL 4: GENERATE ===== -->
+<section class="panel" id="panel-4">
+  <div class="panel-title">
+    <h1>Generate <em>Certificates</em></h1>
+  </div>
+  <p class="panel-subtitle">Review your setup and generate the bulk PDF package</p>
+
+  <div class="generate-grid">
+    <div class="summary-card">
+      <div class="summary-stats">
+        <div class="stat-item">
+          <div class="stat-label">Certificates</div>
+          <div class="stat-value" id="stat-rows">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Fields</div>
+          <div class="stat-value" id="stat-fields">0</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Format</div>
+          <div class="stat-value">PDF <em>+ ZIP</em></div>
+        </div>
+      </div>
+
+      <div class="gen-action">
+        <button class="gen-btn" id="generate-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4 20-7Z"/></svg>
+          Generate Certificates
+        </button>
+
+        <div class="progress-shell" id="progress-shell">
+          <div class="progress-info">
+            <span class="label" id="progress-label">Generating…</span>
+            <span class="count" id="progress-count">0 / 0</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="success-card" id="success-card">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h3>All set!</h3>
+      <p id="success-msg">Your certificates are ready to download</p>
+      <button class="download-btn" id="download-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download ZIP
+      </button>
+    </div>
+  </div>
+
+  <div class="nav-bar">
+    <button class="nav-btn secondary" data-back="3">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back
+    </button>
+    <button class="nav-btn secondary" id="start-over">
+      Start Over
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+  </div>
+</section>
+
+</main>
+
+<footer class="app-footer">
+  <em>CertForge</em> · Bulk certificate generator that runs entirely in your browser · crafted by <em>Aayush Singh</em>
+</footer>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* ============================================================
+   CertForge — Bulk Certificate Generator
+   Single-file app, runs entirely in browser, uses localStorage
+   ============================================================ */
+
+const STORAGE_KEY = 'certforge.v1';
+
+const state = {
+  step: 1,
+  templateDataUrl: null,
+  imageNaturalWidth: 0,
+  imageNaturalHeight: 0,
+  fields: [],          // { id, name, x, y, w, h, fontFamily, fontSize, color, weight, alignment }
+  selectedFieldId: null,
+  csvData: [],
+  csvHeaders: [],
+  fieldMapping: {},    // { fieldId: csvHeaderName }
+  customFonts: {},     // { fontName: dataUrl }
+  generatedZip: null
+};
+
+/* ---------- TOAST ---------- */
+function toast(msg, type = 'info', dur = 2800) {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  const icons = {
+    error: '✕', success: '✓', info: 'ⓘ'
+  };
+  el.innerHTML = `<span style="font-weight:700">${icons[type]||''}</span><span>${msg}</span>`;
+  c.appendChild(el);
+  setTimeout(() => {
+    el.style.animation = 'slideIn 200ms reverse';
+    setTimeout(() => el.remove(), 180);
+  }, dur);
+}
+
+/* ---------- STORAGE ---------- */
+function saveState() {
+  try {
+    const toSave = {
+      step: state.step,
+      templateDataUrl: state.templateDataUrl,
+      imageNaturalWidth: state.imageNaturalWidth,
+      imageNaturalHeight: state.imageNaturalHeight,
+      fields: state.fields,
+      customFonts: state.customFonts
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  } catch (e) {
+    console.warn('Storage save failed:', e);
+  }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    Object.assign(state, data);
+    return true;
+  } catch (e) {
+    console.warn('Storage load failed:', e);
+    return false;
+  }
+}
+
+function clearState() {
+  localStorage.removeItem(STORAGE_KEY);
+  state.step = 1;
+  state.templateDataUrl = null;
+  state.imageNaturalWidth = 0;
+  state.imageNaturalHeight = 0;
+  state.fields = [];
+  state.selectedFieldId = null;
+  state.csvData = [];
+  state.csvHeaders = [];
+  state.fieldMapping = {};
+  state.customFonts = {};
+  state.generatedZip = null;
+}
+
+/* ---------- STEP NAVIGATION ---------- */
+function goToStep(n) {
+  if (n < 1 || n > 4) return;
+
+  // Validation
+  if (n >= 2 && !state.templateDataUrl) {
+    toast('Upload a template first', 'error');
+    return;
+  }
+  if (n >= 3 && state.fields.length === 0) {
+    toast('Draw at least one field', 'error');
+    return;
+  }
+  if (n >= 4 && state.csvData.length === 0) {
+    toast('Upload CSV data first', 'error');
+    return;
+  }
+
+  state.step = n;
+  saveState();
+
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${n}`).classList.add('active');
+
+  document.querySelectorAll('.step-item').forEach(s => {
+    const stepNum = parseInt(s.dataset.step);
+    s.classList.remove('active', 'completed');
+    if (stepNum === n) s.classList.add('active');
+    else if (stepNum < n) s.classList.add('completed');
+  });
+
+  if (n === 2) renderDesignStep();
+  if (n === 3) renderDataStep();
+  if (n === 4) renderGenerateStep();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ---------- STEP 1: UPLOAD ---------- */
+const uploadZone = document.getElementById('upload-zone');
+const templateInput = document.getElementById('template-input');
+
+uploadZone.addEventListener('click', () => templateInput.click());
+uploadZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  uploadZone.classList.add('drag-over');
+});
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleTemplateFile(file);
+});
+
+templateInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) handleTemplateFile(file);
+});
+
+function handleTemplateFile(file) {
+  if (!file.type.match(/image\/(png|jpeg|webp)/)) {
+    toast('Please upload a PNG, JPG, or WEBP image', 'error');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      state.templateDataUrl = e.target.result;
+      state.imageNaturalWidth = img.naturalWidth;
+      state.imageNaturalHeight = img.naturalHeight;
+      saveState();
+      document.getElementById('to-step-2').disabled = false;
+      uploadZone.innerHTML = `
+        <div class="upload-icon" style="background:#dcfce7;color:#059669">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="upload-title">Template loaded</div>
+        <div class="upload-hint">${img.naturalWidth} × ${img.naturalHeight} px · click to replace</div>
+      `;
+      toast('Template loaded successfully', 'success');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('to-step-2').addEventListener('click', () => goToStep(2));
+document.getElementById('reset-all').addEventListener('click', () => {
+  if (confirm('Clear everything and start over?')) {
+    clearState();
+    location.reload();
+  }
+});
+
+/* ---------- STEP 2: DESIGN ---------- */
+const imageStage = document.getElementById('image-stage');
+const templateImg = document.getElementById('template-img');
+const boxesOverlay = document.getElementById('boxes-overlay');
+let displayScale = 1;
+
+function renderDesignStep() {
+  if (!state.templateDataUrl) return;
+  templateImg.src = state.templateDataUrl;
+  templateImg.style.display = 'block';
+  templateImg.onload = () => {
+    updateDisplayScale();
+    renderBoxes();
+    renderProperties();
+    updateFieldCount();
+    document.getElementById('to-step-3').disabled = state.fields.length === 0;
+  };
+}
+
+function updateDisplayScale() {
+  const stageRect = imageStage.getBoundingClientRect();
+  const imgRect = templateImg.getBoundingClientRect();
+  displayScale = imgRect.width / state.imageNaturalWidth;
+}
+
+window.addEventListener('resize', () => {
+  if (state.step === 2) {
+    updateDisplayScale();
+    renderBoxes();
+  }
+});
+
+function renderBoxes() {
+  boxesOverlay.innerHTML = '';
+  state.fields.forEach(f => {
+    const el = document.createElement('div');
+    el.className = 'field-box' + (f.id === state.selectedFieldId ? ' selected' : '');
+    el.dataset.id = f.id;
+    el.style.left = (f.x * displayScale) + 'px';
+    el.style.top = (f.y * displayScale) + 'px';
+    el.style.width = (f.w * displayScale) + 'px';
+    el.style.height = (f.h * displayScale) + 'px';
+
+    const label = document.createElement('div');
+    label.className = 'field-box-label';
+    label.textContent = f.name;
+    el.appendChild(label);
+
+    ['nw','ne','sw','se'].forEach(corner => {
+      const h = document.createElement('div');
+      h.className = `resize-handle ${corner}`;
+      h.dataset.corner = corner;
+      el.appendChild(h);
+    });
+
+    boxesOverlay.appendChild(el);
+  });
+}
+
+function updateFieldCount() {
+  const n = state.fields.length;
+  document.getElementById('field-count').textContent = n + (n === 1 ? ' field' : ' fields');
+}
+
+/* --- Drawing / Dragging / Resizing --- */
+let interaction = null; // { mode: 'draw'|'drag'|'resize', startX, startY, fieldId, corner, originalField }
+
+imageStage.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+
+  const target = e.target;
+  const rect = imageStage.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / displayScale;
+  const y = (e.clientY - rect.top) / displayScale;
+
+  // Resize handle
+  if (target.classList.contains('resize-handle')) {
+    const fieldEl = target.closest('.field-box');
+    const fieldId = fieldEl.dataset.id;
+    const field = state.fields.find(f => f.id === fieldId);
+    interaction = {
+      mode: 'resize',
+      corner: target.dataset.corner,
+      startX: x, startY: y,
+      fieldId,
+      originalField: { ...field }
+    };
+    e.preventDefault();
+    return;
+  }
+
+  // Click on existing box → drag
+  const boxEl = target.closest('.field-box');
+  if (boxEl) {
+    const fieldId = boxEl.dataset.id;
+    state.selectedFieldId = fieldId;
+    const field = state.fields.find(f => f.id === fieldId);
+    interaction = {
+      mode: 'drag',
+      startX: x, startY: y,
+      fieldId,
+      originalField: { ...field }
+    };
+    renderBoxes();
+    renderProperties();
+    e.preventDefault();
+    return;
+  }
+
+  // Otherwise → start drawing new field
+  const newField = createField(x, y, 0, 0);
+  state.fields.push(newField);
+  state.selectedFieldId = newField.id;
+  interaction = {
+    mode: 'draw',
+    startX: x, startY: y,
+    fieldId: newField.id
+  };
+  renderBoxes();
+  renderProperties();
+  e.preventDefault();
+});
+
+window.addEventListener('mousemove', e => {
+  if (!interaction) return;
+  const rect = imageStage.getBoundingClientRect();
+  const x = (e.clientX - rect.left) / displayScale;
+  const y = (e.clientY - rect.top) / displayScale;
+  const field = state.fields.find(f => f.id === interaction.fieldId);
+  if (!field) return;
+
+  if (interaction.mode === 'draw') {
+    field.x = Math.min(x, interaction.startX);
+    field.y = Math.min(y, interaction.startY);
+    field.w = Math.abs(x - interaction.startX);
+    field.h = Math.abs(y - interaction.startY);
+  } else if (interaction.mode === 'drag') {
+    const dx = x - interaction.startX;
+    const dy = y - interaction.startY;
+    field.x = Math.max(0, Math.min(state.imageNaturalWidth - field.w, interaction.originalField.x + dx));
+    field.y = Math.max(0, Math.min(state.imageNaturalHeight - field.h, interaction.originalField.y + dy));
+  } else if (interaction.mode === 'resize') {
+    const orig = interaction.originalField;
+    const c = interaction.corner;
+    if (c.includes('e')) field.w = Math.max(10, x - orig.x);
+    if (c.includes('s')) field.h = Math.max(10, y - orig.y);
+    if (c.includes('w')) {
+      const newX = Math.min(x, orig.x + orig.w - 10);
+      field.w = orig.x + orig.w - newX;
+      field.x = newX;
+    }
+    if (c.includes('n')) {
+      const newY = Math.min(y, orig.y + orig.h - 10);
+      field.h = orig.y + orig.h - newY;
+      field.y = newY;
+    }
+  }
+
+  renderBoxes();
+  renderPropertyValues();
+});
+
+window.addEventListener('mouseup', () => {
+  if (!interaction) return;
+  if (interaction.mode === 'draw') {
+    const field = state.fields.find(f => f.id === interaction.fieldId);
+    if (field && (field.w < 10 || field.h < 10)) {
+      // Too small — remove
+      state.fields = state.fields.filter(f => f.id !== interaction.fieldId);
+      state.selectedFieldId = null;
+      renderBoxes();
+      renderProperties();
+    } else {
+      // Auto-set font size based on box height
+      if (field) field.fontSize = Math.max(12, Math.round(field.h * 0.6));
+      saveState();
+      updateFieldCount();
+      document.getElementById('to-step-3').disabled = false;
+      renderProperties();
+    }
+  } else {
+    saveState();
+  }
+  interaction = null;
+});
+
+function createField(x, y, w, h) {
+  return {
+    id: 'f_' + Math.random().toString(36).slice(2, 10),
+    name: 'Field ' + (state.fields.length + 1),
+    x, y, w, h,
+    fontFamily: 'Arial',
+    fontSize: 48,
+    color: '#000000',
+    weight: 'normal',
+    alignment: 'center'
+  };
+}
+
+/* --- Properties Panel --- */
+function renderProperties() {
+  const empty = document.getElementById('props-empty');
+  const form = document.getElementById('props-form');
+  if (state.fields.length === 0) {
+    empty.style.display = 'block';
+    form.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  form.style.display = 'block';
+
+  // Field list
+  const list = document.getElementById('field-list');
+  list.innerHTML = '';
+  state.fields.forEach(f => {
+    const item = document.createElement('div');
+    item.className = 'field-list-item' + (f.id === state.selectedFieldId ? ' active' : '');
+    item.innerHTML = `<span class="swatch"></span><span class="field-list-name">${escapeHtml(f.name)}</span>`;
+    item.addEventListener('click', () => {
+      state.selectedFieldId = f.id;
+      renderBoxes();
+      renderProperties();
+    });
+    list.appendChild(item);
+  });
+
+  // Ensure something selected
+  if (!state.fields.find(f => f.id === state.selectedFieldId)) {
+    state.selectedFieldId = state.fields[0].id;
+  }
+
+  renderPropertyValues();
+}
+
+function renderPropertyValues() {
+  const f = state.fields.find(x => x.id === state.selectedFieldId);
+  if (!f) return;
+  document.getElementById('prop-name').value = f.name;
+  document.getElementById('prop-font').value = f.fontFamily;
+  document.getElementById('prop-size').value = Math.round(f.fontSize);
+  document.getElementById('prop-color').value = f.color;
+  document.getElementById('prop-color-hex').value = f.color.toUpperCase();
+  document.getElementById('color-swatch').style.background = f.color;
+
+  document.querySelectorAll('#weight-group .toggle-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.value === f.weight));
+  document.querySelectorAll('#align-group .toggle-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.value === f.alignment));
+
+  document.getElementById('prop-x').value = Math.round(f.x);
+  document.getElementById('prop-y').value = Math.round(f.y);
+  document.getElementById('prop-w').value = Math.round(f.w);
+  document.getElementById('prop-h').value = Math.round(f.h);
+}
+
+function bindPropChange(id, key, parser = v => v) {
+  document.getElementById(id).addEventListener('input', e => {
+    const f = state.fields.find(x => x.id === state.selectedFieldId);
+    if (!f) return;
+    f[key] = parser(e.target.value);
+    renderBoxes();
+    if (id === 'prop-name') {
+      // Re-render field list to reflect new name
+      const list = document.getElementById('field-list');
+      list.querySelectorAll('.field-list-name').forEach((el, i) => {
+        el.textContent = state.fields[i].name;
+      });
+    }
+    saveState();
+  });
+}
+
+bindPropChange('prop-name', 'name');
+bindPropChange('prop-font', 'fontFamily');
+bindPropChange('prop-size', 'fontSize', v => parseFloat(v) || 12);
+bindPropChange('prop-x', 'x', v => parseFloat(v) || 0);
+bindPropChange('prop-y', 'y', v => parseFloat(v) || 0);
+bindPropChange('prop-w', 'w', v => Math.max(10, parseFloat(v) || 10));
+bindPropChange('prop-h', 'h', v => Math.max(10, parseFloat(v) || 10));
+
+document.getElementById('prop-color').addEventListener('input', e => {
+  const f = state.fields.find(x => x.id === state.selectedFieldId);
+  if (!f) return;
+  f.color = e.target.value;
+  document.getElementById('prop-color-hex').value = e.target.value.toUpperCase();
+  document.getElementById('color-swatch').style.background = e.target.value;
+  saveState();
+});
+
+document.getElementById('prop-color-hex').addEventListener('input', e => {
+  const v = e.target.value.trim();
+  if (/^#[0-9A-Fa-f]{6}$/.test(v)) {
+    const f = state.fields.find(x => x.id === state.selectedFieldId);
+    if (!f) return;
+    f.color = v;
+    document.getElementById('prop-color').value = v;
+    document.getElementById('color-swatch').style.background = v;
+    saveState();
+  }
+});
+
+document.querySelectorAll('#weight-group .toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#weight-group .toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = state.fields.find(x => x.id === state.selectedFieldId);
+    if (f) { f.weight = btn.dataset.value; saveState(); }
+  });
+});
+
+document.querySelectorAll('#align-group .toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('#align-group .toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const f = state.fields.find(x => x.id === state.selectedFieldId);
+    if (f) { f.alignment = btn.dataset.value; saveState(); }
+  });
+});
+
+document.getElementById('delete-field').addEventListener('click', () => {
+  state.fields = state.fields.filter(f => f.id !== state.selectedFieldId);
+  state.selectedFieldId = state.fields[0]?.id || null;
+  renderBoxes();
+  renderProperties();
+  updateFieldCount();
+  document.getElementById('to-step-3').disabled = state.fields.length === 0;
+  saveState();
+  toast('Field deleted', 'info');
+});
+
+/* --- Custom Font Upload --- */
+document.getElementById('custom-font-btn').addEventListener('click', () => {
+  document.getElementById('custom-font-input').click();
+});
+
+document.getElementById('custom-font-input').addEventListener('change', async e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!/\.(ttf|otf)$/i.test(file.name)) {
+    toast('Please upload a .ttf or .otf font file', 'error');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async ev => {
+    const dataUrl = ev.target.result;
+    const fontName = file.name.replace(/\.(ttf|otf)$/i, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+
+    try {
+      const fontFace = new FontFace(fontName, `url(${dataUrl})`);
+      await fontFace.load();
+      document.fonts.add(fontFace);
+      state.customFonts[fontName] = dataUrl;
+
+      const select = document.getElementById('prop-font');
+      // remove existing custom option with same name if any
+      [...select.options].forEach(o => { if (o.value === `'${fontName}'`) o.remove(); });
+      const opt = document.createElement('option');
+      opt.value = `'${fontName}'`;
+      opt.textContent = fontName + ' (custom)';
+      select.appendChild(opt);
+      select.value = `'${fontName}'`;
+
+      const f = state.fields.find(x => x.id === state.selectedFieldId);
+      if (f) { f.fontFamily = `'${fontName}'`; renderBoxes(); }
+      saveState();
+      toast(`Font "${fontName}" loaded`, 'success');
+    } catch (err) {
+      toast('Failed to load font: ' + err.message, 'error');
+    }
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('to-step-3').addEventListener('click', () => goToStep(3));
+
+/* ---------- STEP 3: DATA ---------- */
+const csvZone = document.getElementById('csv-zone');
+const csvInput = document.getElementById('csv-input');
+
+csvZone.addEventListener('click', () => csvInput.click());
+csvZone.addEventListener('dragover', e => { e.preventDefault(); csvZone.classList.add('drag-over'); });
+csvZone.addEventListener('dragleave', () => csvZone.classList.remove('drag-over'));
+csvZone.addEventListener('drop', e => {
+  e.preventDefault();
+  csvZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleCsvFile(file);
+});
+csvInput.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) handleCsvFile(file);
+});
+
+function handleCsvFile(file) {
+  if (!/\.csv$/i.test(file.name) && file.type !== 'text/csv') {
+    toast('Please upload a .csv file', 'error');
+    return;
+  }
+  Papa.parse(file, {
+    header: true,
+    skipEmptyLines: true,
+    complete: results => {
+      if (results.errors && results.errors.length > 0) {
+        toast('CSV parse warning: ' + results.errors[0].message, 'info');
+      }
+      state.csvData = results.data;
+      state.csvHeaders = results.meta.fields || [];
+
+      // Auto-map fields by name
+      state.fieldMapping = {};
+      state.fields.forEach(f => {
+        const match = state.csvHeaders.find(h => h.toLowerCase().trim() === f.name.toLowerCase().trim());
+        if (match) state.fieldMapping[f.id] = match;
+      });
+
+      renderDataStep();
+      toast(`Loaded ${state.csvData.length} rows`, 'success');
+    },
+    error: err => toast('CSV error: ' + err.message, 'error')
+  });
+}
+
+function renderDataStep() {
+  if (state.csvData.length === 0) {
+    document.getElementById('mapping-block').style.display = 'none';
+    document.getElementById('preview-block').style.display = 'none';
+    document.getElementById('to-step-4').disabled = true;
+    return;
+  }
+
+  // Update zone
+  document.getElementById('csv-zone').classList.add('has-file');
+  document.getElementById('csv-zone-title').textContent = 'CSV loaded · click to replace';
+  document.getElementById('csv-zone-hint').textContent =
+    `${state.csvData.length} rows · ${state.csvHeaders.length} columns`;
+
+  // Render mapping
+  document.getElementById('mapping-block').style.display = 'block';
+  document.getElementById('mapping-meta').textContent = `${state.fields.length} fields`;
+  const list = document.getElementById('mapping-list');
+  list.innerHTML = '';
+  state.fields.forEach(f => {
+    const row = document.createElement('div');
+    const matched = state.fieldMapping[f.id];
+    row.className = 'mapping-row' + (matched ? '' : ' unmatched');
+    row.innerHTML = `
+      <div class="mapping-field"><span class="swatch"></span>${escapeHtml(f.name)}</div>
+      <div class="mapping-arrow">→</div>
+      <select data-field-id="${f.id}">
+        <option value="">— Not mapped —</option>
+        ${state.csvHeaders.map(h => `<option value="${escapeHtml(h)}" ${h === matched ? 'selected' : ''}>${escapeHtml(h)}</option>`).join('')}
+      </select>
+    `;
+    list.appendChild(row);
+  });
+
+  list.querySelectorAll('select').forEach(sel => {
+    sel.addEventListener('change', e => {
+      const fid = e.target.dataset.fieldId;
+      if (e.target.value) state.fieldMapping[fid] = e.target.value;
+      else delete state.fieldMapping[fid];
+      const row = e.target.closest('.mapping-row');
+      row.classList.toggle('unmatched', !e.target.value);
+      updateContinueState();
+    });
+  });
+
+  // Render preview
+  document.getElementById('preview-block').style.display = 'block';
+  document.getElementById('preview-meta').textContent =
+    `Showing ${Math.min(5, state.csvData.length)} of ${state.csvData.length}`;
+  const table = document.getElementById('preview-table');
+  table.innerHTML = '';
+  const thead = document.createElement('thead');
+  const headRow = document.createElement('tr');
+  state.csvHeaders.forEach(h => {
+    const th = document.createElement('th');
+    th.textContent = h;
+    headRow.appendChild(th);
+  });
+  thead.appendChild(headRow);
+  table.appendChild(thead);
+  const tbody = document.createElement('tbody');
+  state.csvData.slice(0, 5).forEach(row => {
+    const tr = document.createElement('tr');
+    state.csvHeaders.forEach(h => {
+      const td = document.createElement('td');
+      td.textContent = row[h] || '';
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  updateContinueState();
+}
+
+function updateContinueState() {
+  const mapped = state.fields.filter(f => state.fieldMapping[f.id]).length;
+  document.getElementById('to-step-4').disabled = mapped === 0;
+}
+
+document.getElementById('to-step-4').addEventListener('click', () => goToStep(4));
+
+/* ---------- STEP 4: GENERATE ---------- */
+function renderGenerateStep() {
+  document.getElementById('stat-rows').textContent = state.csvData.length;
+  document.getElementById('stat-fields').textContent = state.fields.length;
+  document.getElementById('success-card').classList.remove('show');
+  document.getElementById('progress-shell').classList.remove('active');
+}
+
+document.getElementById('generate-btn').addEventListener('click', generateAll);
+
+async function generateAll() {
+  const btn = document.getElementById('generate-btn');
+  btn.disabled = true;
+  document.getElementById('progress-shell').classList.add('active');
+  document.getElementById('success-card').classList.remove('show');
+
+  const total = state.csvData.length;
+  document.getElementById('progress-count').textContent = `0 / ${total}`;
+  document.getElementById('progress-fill').style.width = '0%';
+
+  try {
+    const zip = new JSZip();
+    const { jsPDF } = window.jspdf;
+
+    // Off-screen canvas at natural image dimensions
+    const canvas = document.createElement('canvas');
+    canvas.width = state.imageNaturalWidth;
+    canvas.height = state.imageNaturalHeight;
+    const ctx = canvas.getContext('2d');
+
+    // Pre-load image once
+    const img = new Image();
+    img.src = state.templateDataUrl;
+    await new Promise(res => { img.onload = res; });
+
+    // Re-load custom fonts (in case page reloaded)
+    for (const [name, dataUrl] of Object.entries(state.customFonts || {})) {
+      try {
+        const ff = new FontFace(name, `url(${dataUrl})`);
+        await ff.load();
+        document.fonts.add(ff);
+      } catch (e) {}
+    }
+
+    const usedFilenames = new Set();
+    const firstField = state.fields[0];
+
+    for (let i = 0; i < state.csvData.length; i++) {
+      const row = state.csvData[i];
+
+      // Render certificate to canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      for (const f of state.fields) {
+        const colName = state.fieldMapping[f.id];
+        const value = colName ? (row[colName] || '') : '';
+        if (!value) continue;
+
+        const weight = f.weight === 'bold' ? 'bold' : 'normal';
+        ctx.font = `${weight} ${f.fontSize}px ${f.fontFamily}`;
+        ctx.fillStyle = f.color;
+        ctx.textAlign = f.alignment;
+        ctx.textBaseline = 'middle';
+
+        let textX;
+        if (f.alignment === 'left') textX = f.x;
+        else if (f.alignment === 'center') textX = f.x + f.w / 2;
+        else textX = f.x + f.w;
+
+        const textY = f.y + f.h / 2;
+
+        // Auto-shrink if text too wide
+        let fontSize = f.fontSize;
+        ctx.font = `${weight} ${fontSize}px ${f.fontFamily}`;
+        let metrics = ctx.measureText(String(value));
+        while (metrics.width > f.w && fontSize > 6) {
+          fontSize -= 1;
+          ctx.font = `${weight} ${fontSize}px ${f.fontFamily}`;
+          metrics = ctx.measureText(String(value));
+        }
+
+        ctx.fillText(String(value), textX, textY);
+      }
+
+      // Convert to PDF
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const orientation = canvas.width >= canvas.height ? 'landscape' : 'portrait';
+      const pdf = new jsPDF({
+        orientation,
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+        hotfixes: ['px_scaling']
+      });
+      pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width, canvas.height);
+
+      // Filename: based on first field's mapped value
+      let filenameBase = 'certificate_' + (i + 1);
+      if (firstField && state.fieldMapping[firstField.id]) {
+        const v = String(row[state.fieldMapping[firstField.id]] || '').trim();
+        if (v) filenameBase = sanitizeFilename(v);
+      }
+      let filename = filenameBase + '.pdf';
+      let dupCount = 1;
+      while (usedFilenames.has(filename)) {
+        filename = `${filenameBase}_${++dupCount}.pdf`;
+      }
+      usedFilenames.add(filename);
+
+      const pdfBlob = pdf.output('arraybuffer');
+      zip.file(filename, pdfBlob);
+
+      // Update progress
+      const pct = Math.round(((i + 1) / total) * 100);
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('progress-count').textContent = `${i + 1} / ${total}`;
+      document.getElementById('progress-label').textContent = `Generating ${filename}…`;
+
+      // Yield to browser to keep UI responsive
+      if (i % 3 === 0) await new Promise(r => setTimeout(r, 0));
+    }
+
+    document.getElementById('progress-label').textContent = 'Compressing ZIP…';
+    const zipBlob = await zip.generateAsync({ type: 'blob' }, meta => {
+      // Could update progress here too
+    });
+
+    state.generatedZip = zipBlob;
+    document.getElementById('progress-shell').classList.remove('active');
+    document.getElementById('success-card').classList.add('show');
+    document.getElementById('success-msg').textContent =
+      `${total} certificate${total !== 1 ? 's' : ''} packaged into a ZIP file`;
+    btn.disabled = false;
+    toast('Certificates ready!', 'success');
+  } catch (err) {
+    console.error(err);
+    toast('Generation failed: ' + err.message, 'error', 4000);
+    document.getElementById('progress-shell').classList.remove('active');
+    btn.disabled = false;
+  }
+}
+
+document.getElementById('download-btn').addEventListener('click', () => {
+  if (!state.generatedZip) {
+    toast('Generate certificates first', 'error');
+    return;
+  }
+  const ts = new Date().toISOString().slice(0, 10);
+  saveAs(state.generatedZip, `certificates_${ts}.zip`);
+});
+
+document.getElementById('start-over').addEventListener('click', () => {
+  if (confirm('Start over? This will clear your current setup.')) {
+    clearState();
+    location.reload();
+  }
+});
+
+/* ---------- BACK BUTTONS ---------- */
+document.querySelectorAll('[data-back]').forEach(btn => {
+  btn.addEventListener('click', () => goToStep(parseInt(btn.dataset.back)));
+});
+
+/* ---------- STEP CLICK NAVIGATION ---------- */
+document.querySelectorAll('.step-item').forEach(s => {
+  s.addEventListener('click', () => {
+    const n = parseInt(s.dataset.step);
+    goToStep(n);
+  });
+});
+
+/* ---------- HELPERS ---------- */
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function sanitizeFilename(s) {
+  return String(s).replace(/[\\/:*?"<>|]/g, '_').replace(/\s+/g, '_').slice(0, 80) || 'certificate';
+}
+
+/* ---------- INIT FROM STORAGE ---------- */
+(async function init() {
+  if (loadState()) {
+    if (state.templateDataUrl) {
+      document.getElementById('to-step-2').disabled = false;
+      const img = new Image();
+      img.onload = () => {
+        uploadZone.innerHTML = `
+          <div class="upload-icon" style="background:#dcfce7;color:#059669">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+          <div class="upload-title">Template restored</div>
+          <div class="upload-hint">${img.naturalWidth} × ${img.naturalHeight} px · click to replace</div>
+        `;
+      };
+      img.src = state.templateDataUrl;
+
+      // Restore custom fonts
+      for (const [name, dataUrl] of Object.entries(state.customFonts || {})) {
+        try {
+          const ff = new FontFace(name, `url(${dataUrl})`);
+          await ff.load();
+          document.fonts.add(ff);
+          const select = document.getElementById('prop-font');
+          if (![...select.options].find(o => o.value === `'${name}'`)) {
+            const opt = document.createElement('option');
+            opt.value = `'${name}'`;
+            opt.textContent = name + ' (custom)';
+            select.appendChild(opt);
+          }
+        } catch (e) {}
+      }
+    }
+
+    // Always start fresh on step 1 to avoid confusion (CSV not persisted)
+    state.step = 1;
+    state.csvData = [];
+    state.csvHeaders = [];
+    state.fieldMapping = {};
+    if (state.fields.length > 0) {
+      toast('Previous design restored', 'info');
+    }
+  }
+})();
+
+</script>
+</body>
+</html>

@@ -887,6 +887,207 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
+  /* ============== Mobile-only horizontal toolbar (Step 2) ============== */
+  /* Hidden by default — only renders on phones via the @media block below.
+     Desktop and laptop continue to use the right-side .props panel exactly as before. */
+  .mobile-toolbar {
+    display: none;
+    position: sticky;
+    top: 6px;
+    z-index: 20;
+    background: var(--bg-elev);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    gap: 14px;
+    align-items: stretch;
+  }
+  .mobile-toolbar::-webkit-scrollbar { height: 6px; }
+  .mobile-toolbar::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+  .mt-section {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-shrink: 0;
+    align-items: flex-start;
+    justify-content: flex-end;
+  }
+  .mt-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--ink-mute);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    line-height: 1;
+  }
+  .mt-label .value-display {
+    font-size: 9.5px;
+    padding: 1px 5px;
+    margin-left: 4px;
+    min-width: 0;
+  }
+  .mt-divider {
+    width: 1px;
+    background: var(--line);
+    flex-shrink: 0;
+    margin: 6px 0;
+  }
+  .mt-chips {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .mt-chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 9px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--accent);
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 500;
+    transition: all .15s;
+  }
+  .mt-chip.selected {
+    border-color: var(--gold);
+    background: #fffaee;
+    box-shadow: 0 0 0 2px rgba(200,155,60,.15);
+  }
+  .mt-hint {
+    font-size: 11.5px;
+    color: var(--ink-mute);
+    font-style: italic;
+    padding: 6px 4px;
+  }
+  .mt-input {
+    width: 110px;
+    padding: 6px 9px;
+    font-size: 12.5px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink);
+    outline: none;
+    box-sizing: border-box;
+  }
+  .mt-input:focus { border-color: var(--gold); }
+  .mt-select {
+    width: 100px;
+    padding: 6px 22px 6px 9px;
+    font-size: 12.5px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink);
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'><path fill='none' stroke='%234a5060' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round' d='M3 4.5l3 3 3-3'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 7px center;
+  }
+  .mt-size-control {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 140px;
+  }
+  .mt-size-control input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1;
+    height: 5px;
+    background: var(--line-soft);
+    border-radius: 3px;
+    outline: none;
+    margin: 0;
+  }
+  .mt-size-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .mt-size-control input[type="range"]::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid #fff;
+  }
+  .mt-size-control input[type="number"] {
+    width: 46px;
+    padding: 5px 2px;
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    outline: none;
+    -moz-appearance: textfield;
+  }
+  .mt-size-control input[type="number"]::-webkit-outer-spin-button,
+  .mt-size-control input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none; margin: 0;
+  }
+  .mt-color-row { display: inline-flex; align-items: center; gap: 5px; }
+  .mt-color-row input[type="color"] {
+    width: 34px; height: 30px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    cursor: pointer;
+    padding: 2px;
+  }
+  .mt-toggles { display: inline-flex; gap: 3px; }
+  .mt-toggle {
+    width: 30px; height: 30px;
+    border: 1.5px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--ink-soft);
+    display: grid; place-items: center;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    padding: 0;
+  }
+  .mt-toggle.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .mt-toggle svg { width: 12px; height: 12px; }
+  .mt-delete-btn {
+    background: rgba(192,57,43,.08);
+    color: var(--danger);
+    border: 1.5px solid rgba(192,57,43,.25);
+    padding: 7px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    height: 30px;
+  }
+  .mt-delete-btn:hover { background: rgba(192,57,43,.14); }
+
+  /* Touch-only canvas behavior — prevent page scroll while drawing */
+  .canvas-stage { touch-action: none; }
+
   @media (max-width: 900px) {
     .design-layout { grid-template-columns: 1fr; }
     .props { position: static; }
@@ -895,6 +1096,17 @@
     .stepper { gap: 0; }
     .step-item .label { display: none; }
     .step-item:not(:last-child)::after { left: 40px; right: -10px; }
+
+    /* === Phone-only swap: hide right-side props panel, show horizontal toolbar === */
+    .design-layout > .props { display: none; }
+    .mobile-toolbar { display: flex; }
+
+    /* Larger resize handles for finger-friendly grabbing */
+    .field-box .resize-handle {
+      width: 18px; height: 18px;
+      bottom: -9px; right: -9px;
+      border-width: 2px;
+    }
   }
   @media (max-width: 560px) {
     .summary-grid { grid-template-columns: 1fr; }
@@ -987,7 +1199,8 @@
 
     <section id="step-2" class="step-panel card-pad" hidden>
       <h2 class="panel-title">Design the Layout</h2>
-      <p class="panel-sub">Click and drag on the certificate to define each text field</p>
+      <p class="panel-sub">Click, tap or drag on the certificate to define each text field</p>
+      <div class="mobile-toolbar" id="mobileToolbar"></div>
       <div class="design-layout">
         <div class="canvas-wrap">
           <div class="canvas-stage" id="canvasStage">
@@ -1217,22 +1430,106 @@ fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
 ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e => { e.preventDefault(); dropzone.classList.remove('dragover'); }));
 dropzone.addEventListener('drop', e => handleFile(e.dataTransfer.files[0]));
 
+/* ============== Comprehensive reset — clears EVERY piece of state + UI ==============
+   Each section is wrapped in its own try/catch so a failure in one DOM operation
+   (e.g. iOS Safari throwing on file input clear) can't prevent the rest from running.
+   gotoStep(1) is called FIRST so the user always lands on Step 1 even if something
+   downstream errors out. */
+function resetAll() {
+  // 0. Get to step 1 IMMEDIATELY — even if all clearing fails, user lands here
+  try { gotoStep(1); } catch (e) { console.warn('gotoStep failed', e); }
+
+  // 1. Clear persisted state
+  try { localStorage.removeItem(LS_KEY); } catch (e) {}
+
+  // 2. Reset all in-memory state
+  try {
+    state.imageDataUrl = null;
+    state.imageNaturalWidth = 0;
+    state.imageNaturalHeight = 0;
+    state.imageType = 'image/png';
+    state.fields = [];
+    state.selectedFieldId = null;
+    state.csvData = null;
+    state.csvHeaders = [];
+    state.filenameColumn = null;
+    fieldCounter = 0;
+    drawing = null; dragging = null; resizing = null;
+  } catch (e) { console.warn('state reset failed', e); }
+
+  // 3. Remove any temp drawing box
+  try {
+    const tempBox = document.getElementById('tempDrawBox');
+    if (tempBox) tempBox.remove();
+  } catch (e) {}
+
+  // 4. STEP 1: clear preview
+  try {
+    if (previewImg) previewImg.removeAttribute('src');
+    if (previewMeta) previewMeta.textContent = '';
+    if (previewWrap) previewWrap.hidden = true;
+    if (next1) next1.disabled = true;
+  } catch (e) { console.warn('preview clear failed', e); }
+  // File input clear can throw on iOS Safari — wrap separately
+  try { if (fileInput) fileInput.value = ''; } catch (e) {}
+
+  // 5. STEP 2: canvas + properties + field list + mobile toolbar
+  try {
+    if (designImg) designImg.removeAttribute('src');
+    if (canvasStage) canvasStage.querySelectorAll('.field-box').forEach(el => el.remove());
+    if (next2) next2.disabled = true;
+    if (propsBody) propsBody.innerHTML = `
+      <div class="props-empty">
+        <div class="icon">✦</div>
+        <div>Draw a box on the certificate to add a field, then customize it here.</div>
+      </div>`;
+    if (fieldList) fieldList.hidden = true;
+    if (fieldChips) fieldChips.innerHTML = '';
+    if (fieldCount) fieldCount.textContent = '0';
+    const mt = document.getElementById('mobileToolbar');
+    if (mt) mt.innerHTML = '';
+  } catch (e) { console.warn('step 2 clear failed', e); }
+
+  // 6. STEP 3: clear CSV upload UI
+  try {
+    if (csvResult) csvResult.hidden = true;
+    if (mappingGrid) mappingGrid.innerHTML = '';
+    if (filenameSelect) { filenameSelect.innerHTML = ''; filenameSelect.onchange = null; }
+    if (dataTable) dataTable.innerHTML = '';
+    if (rowCount) rowCount.textContent = '';
+    if (next3) next3.disabled = true;
+  } catch (e) { console.warn('step 3 clear failed', e); }
+  try { if (csvInput) csvInput.value = ''; } catch (e) {}
+
+  // 7. STEP 4: clear summary tiles + progress
+  try {
+    if (sumFields) sumFields.textContent = '0';
+    if (sumRows) sumRows.textContent = '0';
+    if (sumPdfs) sumPdfs.textContent = '0';
+    if (progressBar) progressBar.style.width = '0%';
+    if (progressText) progressText.textContent = 'Ready to generate';
+  } catch (e) { console.warn('step 4 clear failed', e); }
+
+  // 8. Final toast
+  try { showToast('Reset complete', 'success'); } catch (e) {}
+}
+
+/* Hard fallback — used if resetAll() itself throws unexpectedly */
+function hardReset() {
+  try { localStorage.removeItem(LS_KEY); } catch (e) {}
+  location.reload();
+}
+
 resetBtn.addEventListener('click', () => {
   if (!confirm('Clear template and all fields?')) return;
-  localStorage.removeItem(LS_KEY);
-  state.imageDataUrl = null;
-  state.fields = [];
-  state.csvData = null;
-  state.csvHeaders = [];
-  fieldCounter = 0;
-  previewWrap.hidden = true;
-  next1.disabled = true;
-  fileInput.value = '';
-  showToast('Reset complete');
+  try { resetAll(); } catch (err) {
+    console.error('resetAll threw, falling back to reload:', err);
+    hardReset();
+  }
 });
 
 next1.addEventListener('click', () => {
-  const renderAll = () => { renderFields(); renderProps(); renderFieldList(); };
+  const renderAll = () => { renderFields(); renderProps(); renderFieldList(); renderMobileToolbar(); };
   designImg.onload = renderAll;
   designImg.src = state.imageDataUrl;
   if (designImg.complete && designImg.naturalWidth) setTimeout(renderAll, 0);
@@ -1251,53 +1548,53 @@ function imgCoords(e) {
   return { x: (e.clientX - rect.left) / scale, y: (e.clientY - rect.top) / scale };
 }
 
-canvasStage.addEventListener('mousedown', e => {
-  if (e.target.classList.contains('resize-handle')) {
-    const fid = e.target.parentElement.dataset.id;
+/* ============== Pointer handlers (unified for mouse + touch) ============== */
+function pointerStart(target, clientX, clientY) {
+  if (target.classList && target.classList.contains('resize-handle')) {
+    const fid = target.parentElement.dataset.id;
     const f = state.fields.find(x => x.id === fid);
-    resizing = { fieldId: fid, startX: e.clientX, startY: e.clientY, w: f.width, h: f.height };
+    if (!f) return;
+    resizing = { fieldId: fid, startX: clientX, startY: clientY, w: f.width, h: f.height };
     selectField(fid);
-    e.preventDefault();
     return;
   }
-  if (e.target.closest('.field-box')) {
-    const box = e.target.closest('.field-box');
-    const fid = box.dataset.id;
+  const fieldBoxEl = target.closest && target.closest('.field-box');
+  if (fieldBoxEl) {
+    const fid = fieldBoxEl.dataset.id;
     selectField(fid);
-    const c = imgCoords(e);
+    const c = imgCoords({ clientX, clientY });
     const f = state.fields.find(x => x.id === fid);
     dragging = { fieldId: fid, offsetX: c.x - f.x, offsetY: c.y - f.y };
-    e.preventDefault();
     return;
   }
-  const c = imgCoords(e);
+  const c = imgCoords({ clientX, clientY });
   drawing = { startX: c.x, startY: c.y, currX: c.x, currY: c.y };
   selectField(null);
-});
+}
 
-window.addEventListener('mousemove', e => {
+function pointerMove(clientX, clientY) {
   if (drawing) {
-    const c = imgCoords(e);
+    const c = imgCoords({ clientX, clientY });
     drawing.currX = c.x; drawing.currY = c.y;
     renderDrawingPreview();
   } else if (dragging) {
-    const c = imgCoords(e);
+    const c = imgCoords({ clientX, clientY });
     const f = state.fields.find(x => x.id === dragging.fieldId);
     f.x = Math.max(0, Math.min(state.imageNaturalWidth - f.width, c.x - dragging.offsetX));
     f.y = Math.max(0, Math.min(state.imageNaturalHeight - f.height, c.y - dragging.offsetY));
     renderFields();
   } else if (resizing) {
     const scale = getStageScale();
-    const dx = (e.clientX - resizing.startX) / scale;
-    const dy = (e.clientY - resizing.startY) / scale;
+    const dx = (clientX - resizing.startX) / scale;
+    const dy = (clientY - resizing.startY) / scale;
     const f = state.fields.find(x => x.id === resizing.fieldId);
     f.width = Math.max(20, resizing.w + dx);
     f.height = Math.max(14, resizing.h + dy);
     renderFields();
   }
-});
+}
 
-window.addEventListener('mouseup', () => {
+function pointerEnd() {
   if (drawing) {
     const x = Math.min(drawing.startX, drawing.currX);
     const y = Math.min(drawing.startY, drawing.currY);
@@ -1327,7 +1624,38 @@ window.addEventListener('mouseup', () => {
   }
   if (dragging || resizing) saveState();
   dragging = null; resizing = null;
+}
+
+/* Mouse — desktop / laptop (unchanged behavior) */
+canvasStage.addEventListener('mousedown', e => {
+  pointerStart(e.target, e.clientX, e.clientY);
+  if (drawing || dragging || resizing) e.preventDefault();
 });
+window.addEventListener('mousemove', e => {
+  pointerMove(e.clientX, e.clientY);
+});
+window.addEventListener('mouseup', () => pointerEnd());
+
+/* Touch — phones / tablets. Active only when an interaction is in progress,
+   so the page can still scroll normally elsewhere. */
+canvasStage.addEventListener('touchstart', e => {
+  if (e.touches.length !== 1) return;
+  const t = e.touches[0];
+  const target = document.elementFromPoint(t.clientX, t.clientY) || e.target;
+  pointerStart(target, t.clientX, t.clientY);
+  if (drawing || dragging || resizing) e.preventDefault();
+}, { passive: false });
+
+window.addEventListener('touchmove', e => {
+  if (!(drawing || dragging || resizing)) return;
+  if (e.touches.length !== 1) return;
+  const t = e.touches[0];
+  pointerMove(t.clientX, t.clientY);
+  e.preventDefault();
+}, { passive: false });
+
+window.addEventListener('touchend', () => pointerEnd());
+window.addEventListener('touchcancel', () => { drawing = null; dragging = null; resizing = null; renderFields(); });
 
 function renderDrawingPreview() {
   const existing = document.getElementById('tempDrawBox');
@@ -1378,7 +1706,7 @@ function renderFields() {
 
 function selectField(id) {
   state.selectedFieldId = id;
-  renderFields(); renderProps(); renderFieldList();
+  renderFields(); renderProps(); renderFieldList(); renderMobileToolbar();
 }
 
 function renderProps() {
@@ -1514,13 +1842,171 @@ function renderFieldList() {
         if (!confirm(`Delete field "${f.name}"?`)) return;
         state.fields = state.fields.filter(x=>x.id!==id);
         if (state.selectedFieldId === id) state.selectedFieldId = null;
-        renderFields(); renderProps(); renderFieldList();
+        renderFields(); renderProps(); renderFieldList(); renderMobileToolbar();
         next2.disabled = state.fields.length === 0;
         saveState();
       } else {
         selectField(chip.dataset.id);
       }
     });
+  });
+}
+
+/* ============== Mobile-only horizontal toolbar renderer ==============
+   This builds the SAME controls as the desktop properties panel, but laid
+   out horizontally so they fit on a phone. It only renders into the toolbar
+   element — the desktop .props panel is unaffected and continues to work. */
+function renderMobileToolbar() {
+  const toolbar = document.getElementById('mobileToolbar');
+  if (!toolbar) return;
+  const f = state.fields.find(x => x.id === state.selectedFieldId);
+
+  // Section 1 — Field chips (always visible)
+  let html = `
+    <div class="mt-section">
+      <div class="mt-label">Fields (${state.fields.length})</div>
+      <div class="mt-chips" id="mtChips">
+        ${state.fields.length === 0
+          ? '<span class="mt-hint">Drag on certificate to draw a box</span>'
+          : state.fields.map(field => `
+            <span class="mt-chip ${field.id === state.selectedFieldId ? 'selected' : ''}" data-mt-fid="${field.id}">
+              ${escapeHtml(field.name)}
+            </span>
+          `).join('')
+        }
+      </div>
+    </div>
+  `;
+
+  // Section 2 — Properties (only when a field is selected)
+  if (f) {
+    html += `
+      <div class="mt-divider"></div>
+      <div class="mt-section">
+        <div class="mt-label">Name</div>
+        <input type="text" class="mt-input" id="mtName" value="${escapeHtml(f.name)}" placeholder="name">
+      </div>
+      <div class="mt-section">
+        <div class="mt-label">Font</div>
+        <select class="mt-select" id="mtFont">
+          ${FONT_FAMILIES.map(ff => `<option value="${ff.value}" ${f.fontFamily === ff.value ? 'selected' : ''}>${ff.name}</option>`).join('')}
+        </select>
+      </div>
+      <div class="mt-section">
+        <div class="mt-label">Size <span class="value-display" id="mtSizeDisplay">${f.fontSize}px</span></div>
+        <div class="mt-size-control">
+          <input type="range" id="mtSizeSlider" min="6" max="200" step="1" value="${f.fontSize}">
+          <input type="number" id="mtSize" min="6" max="200" step="1" value="${f.fontSize}">
+        </div>
+      </div>
+      <div class="mt-section">
+        <div class="mt-label">Color</div>
+        <div class="mt-color-row">
+          <input type="color" id="mtColor" value="${f.color}">
+        </div>
+      </div>
+      <div class="mt-section">
+        <div class="mt-label">Style</div>
+        <div class="mt-toggles">
+          <button type="button" class="mt-toggle ${f.bold?'active':''}" id="mtBold" style="font-weight:700">B</button>
+          <button type="button" class="mt-toggle ${f.italic?'active':''}" id="mtItalic" style="font-style:italic">I</button>
+        </div>
+      </div>
+      <div class="mt-section">
+        <div class="mt-label">Align</div>
+        <div class="mt-toggles">
+          <button type="button" class="mt-toggle ${f.align==='left'?'active':''}" data-mt-align="left" aria-label="Left">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M2 8h8M2 12h12"/></svg>
+          </button>
+          <button type="button" class="mt-toggle ${f.align==='center'?'active':''}" data-mt-align="center" aria-label="Center">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M4 8h8M2 12h12"/></svg>
+          </button>
+          <button type="button" class="mt-toggle ${f.align==='right'?'active':''}" data-mt-align="right" aria-label="Right">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M2 4h12M6 8h8M2 12h12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="mt-section">
+        <div class="mt-label">&nbsp;</div>
+        <button type="button" class="mt-delete-btn" id="mtDelete">Delete</button>
+      </div>
+    `;
+  }
+
+  toolbar.innerHTML = html;
+
+  // Wire up handlers
+  toolbar.querySelectorAll('[data-mt-fid]').forEach(chip => {
+    chip.addEventListener('click', () => selectField(chip.dataset.mtFid));
+  });
+
+  if (!f) return;
+
+  // Helper to also keep the desktop props panel in sync (when present)
+  const dProp = id => document.getElementById(id);
+
+  const mtName = document.getElementById('mtName');
+  mtName.addEventListener('input', e => {
+    f.name = e.target.value.trim() || f.name;
+    renderFields(); renderFieldList(); saveState();
+    // Update chip text in-place without rebuilding toolbar (preserves input focus)
+    const chip = toolbar.querySelector(`[data-mt-fid="${f.id}"]`);
+    if (chip) chip.textContent = f.name;
+    // Sync the desktop input too (it's hidden on mobile but exists in DOM)
+    if (dProp('pName') && dProp('pName').value !== f.name) dProp('pName').value = f.name;
+  });
+
+  document.getElementById('mtFont').addEventListener('change', e => {
+    f.fontFamily = e.target.value;
+    renderFields(); saveState();
+    if (dProp('pFont')) dProp('pFont').value = f.fontFamily;
+  });
+
+  const mtSlider = document.getElementById('mtSizeSlider');
+  const mtNum = document.getElementById('mtSize');
+  const mtDisplay = document.getElementById('mtSizeDisplay');
+  function mtUpdSize(val) {
+    val = Math.max(6, Math.min(200, parseInt(val,10) || f.fontSize));
+    f.fontSize = val;
+    mtSlider.value = val; mtNum.value = val;
+    mtDisplay.textContent = val + 'px';
+    renderFields();
+    // Sync desktop panel controls if visible/present
+    if (dProp('pSizeSlider')) dProp('pSizeSlider').value = val;
+    if (dProp('pSize')) dProp('pSize').value = val;
+    if (dProp('pSizeDisplay')) dProp('pSizeDisplay').textContent = val + 'px';
+    saveState();
+  }
+  mtSlider.addEventListener('input', e => mtUpdSize(e.target.value));
+  mtNum.addEventListener('input', e => mtUpdSize(e.target.value));
+
+  document.getElementById('mtColor').addEventListener('input', e => {
+    f.color = e.target.value;
+    renderFields(); saveState();
+    if (dProp('pColor')) dProp('pColor').value = f.color;
+    if (dProp('pColorHex')) dProp('pColorHex').value = f.color.toUpperCase();
+  });
+
+  document.getElementById('mtBold').addEventListener('click', () => {
+    f.bold = !f.bold; renderMobileToolbar(); renderProps(); renderFields(); saveState();
+  });
+  document.getElementById('mtItalic').addEventListener('click', () => {
+    f.italic = !f.italic; renderMobileToolbar(); renderProps(); renderFields(); saveState();
+  });
+  toolbar.querySelectorAll('[data-mt-align]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      f.align = btn.dataset.mtAlign;
+      renderMobileToolbar(); renderProps(); renderFields(); saveState();
+    });
+  });
+  document.getElementById('mtDelete').addEventListener('click', () => {
+    if (!confirm(`Delete field "${f.name}"?`)) return;
+    state.fields = state.fields.filter(x => x.id !== f.id);
+    state.selectedFieldId = null;
+    renderFields(); renderProps(); renderFieldList(); renderMobileToolbar();
+    next2.disabled = state.fields.length === 0;
+    saveState();
+    showToast('Field deleted');
   });
 }
 
@@ -1657,8 +2143,10 @@ next3.addEventListener('click', () => {
 back4.addEventListener('click', () => gotoStep(3));
 startOver.addEventListener('click', () => {
   if (!confirm('Start over with a new template?')) return;
-  localStorage.removeItem(LS_KEY);
-  location.reload();
+  try { resetAll(); } catch (err) {
+    console.error('resetAll threw, falling back to reload:', err);
+    hardReset();
+  }
 });
 
 generateBtn.addEventListener('click', async () => {

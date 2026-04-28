@@ -2,14 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>CertForge — Bulk Certificate Generator</title>
+<meta name="description" content="Bulk certificate generator that runs entirely in your browser. Crafted by Aayush Singh.">
+<meta name="theme-color" content="#1d2945">
+<meta name="application-name" content="CertForge">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CertForge">
+<link rel="manifest" id="appManifest">
+<link rel="icon" id="favIcon" type="image/svg+xml">
+<link rel="apple-touch-icon" id="appleIcon">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,500&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #fbf8f3;
@@ -47,6 +58,73 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     line-height: 1.5;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+
+  /* Install App pill — appears in top-right when installable */
+  .install-pill {
+    position: fixed;
+    top: calc(16px + env(safe-area-inset-top));
+    right: 16px;
+    z-index: 100;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+    cursor: pointer;
+    transition: all .2s cubic-bezier(.2,.7,.2,1);
+    border: 1.5px solid var(--accent);
+  }
+  .install-pill:hover {
+    background: #131c33;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
+  }
+  .install-pill.show { display: inline-flex; animation: pillIn .4s cubic-bezier(.2,.7,.2,1); }
+  .install-pill svg { width: 14px; height: 14px; }
+  @keyframes pillIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* iOS install hint sheet — shown on iOS Safari since it has no install API */
+  .ios-hint {
+    position: fixed;
+    bottom: 16px; left: 16px; right: 16px;
+    background: var(--accent);
+    color: #fff;
+    padding: 14px 16px;
+    border-radius: 12px;
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+    display: none;
+    font-size: 13px;
+    line-height: 1.5;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .ios-hint.show { display: block; animation: pillIn .35s cubic-bezier(.2,.7,.2,1); }
+  .ios-hint b { color: var(--gold-soft); font-weight: 700; }
+  .ios-hint .close-x {
+    position: absolute;
+    top: 8px; right: 10px;
+    color: rgba(255,255,255,.7);
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px 6px;
+    cursor: pointer;
+  }
+  .ios-hint .close-x:hover { color: #fff; }
+  .ios-hint .arrow {
+    display: inline-block;
+    margin: 0 3px;
+    transform: translateY(2px);
   }
   button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
   input, select, textarea { font-family: inherit; }
@@ -828,6 +906,21 @@
 </head>
 <body>
 
+<button class="install-pill" id="installPill" type="button" aria-label="Install CertForge">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+  </svg>
+  <span>Install App</span>
+</button>
+
+<div class="ios-hint" id="iosHint" role="dialog" aria-label="Install instructions for iOS">
+  <span class="close-x" id="iosHintClose" aria-label="Dismiss">×</span>
+  <b>Install CertForge</b><br>
+  Tap the <b>Share</b>
+  <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+  button below, then choose <b>"Add to Home Screen"</b> to install.
+</div>
+
 <header class="site">
   <div class="brand">
     <div class="brand-mark">C</div>
@@ -927,21 +1020,21 @@
 
     <section id="step-3" class="step-panel card-pad" hidden>
       <h2 class="panel-title">Upload Recipient Data</h2>
-      <p class="panel-sub">A CSV file containing rows of recipient details</p>
+      <p class="panel-sub">CSV, Excel (XLSX/XLS), TSV, JSON or TXT — all formats supported</p>
       <div class="data-layout">
         <div class="csv-info">
           <p>Your CSV column headers must match the field names you defined. Example: <code>name,course,date</code></p>
         </div>
         <label class="dropzone" id="csvDrop">
-          <input type="file" id="csvInput" accept=".csv,text/csv">
+          <input type="file" id="csvInput" accept=".csv,.tsv,.txt,.xlsx,.xls,.ods,.json,text/csv,text/tab-separated-values,text/plain,application/json,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
           <div class="upload-icon">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
               <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
               <path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/>
             </svg>
           </div>
-          <h3>Drop CSV file here</h3>
-          <p>or click to browse</p>
+          <h3>Drop your data file here</h3>
+          <p>CSV · XLSX · XLS · TSV · JSON · TXT</p>
         </label>
         <div id="csvResult" hidden>
           <h4 style="font-family:var(--display);font-size:16px;margin:24px 0 10px">Field Mapping</h4>
@@ -1449,15 +1542,75 @@ csvDrop.addEventListener('drop', e => handleCsv(e.dataTransfer.files[0]));
 
 function handleCsv(file) {
   if (!file) return;
+  const name = file.name.toLowerCase();
+  const ext = name.includes('.') ? name.split('.').pop() : '';
+
+  // Excel and OpenDocument: parse with SheetJS
+  if (['xlsx','xls','ods','xlsm','xlsb'].includes(ext)) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+        const sheet = wb.Sheets[wb.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false });
+        if (!rows.length) { showToast('Spreadsheet has no data rows', 'error'); return; }
+        state.csvData = rows;
+        state.csvHeaders = Object.keys(rows[0]);
+        renderCsv();
+        showToast(`Loaded ${rows.length} recipients from ${ext.toUpperCase()}`, 'success');
+      } catch (err) {
+        showToast('Could not read spreadsheet: ' + err.message, 'error');
+      }
+    };
+    reader.onerror = () => showToast('Failed to read file', 'error');
+    reader.readAsArrayBuffer(file);
+    return;
+  }
+
+  // JSON: expect array of objects
+  if (ext === 'json' || file.type === 'application/json') {
+    const reader = new FileReader();
+    reader.onload = e => {
+      try {
+        const parsed = JSON.parse(e.target.result);
+        const rows = Array.isArray(parsed) ? parsed : (parsed.data || parsed.rows || parsed.recipients || []);
+        if (!Array.isArray(rows) || !rows.length) { showToast('JSON must be an array of objects with data', 'error'); return; }
+        // Normalize: collect all unique keys across rows
+        const headerSet = new Set();
+        rows.forEach(r => { if (r && typeof r === 'object') Object.keys(r).forEach(k => headerSet.add(k)); });
+        state.csvData = rows.map(r => {
+          const o = {};
+          headerSet.forEach(h => { o[h] = r[h] != null ? String(r[h]) : ''; });
+          return o;
+        });
+        state.csvHeaders = [...headerSet];
+        renderCsv();
+        showToast(`Loaded ${rows.length} recipients from JSON`, 'success');
+      } catch (err) {
+        showToast('Invalid JSON: ' + err.message, 'error');
+      }
+    };
+    reader.readAsText(file);
+    return;
+  }
+
+  // CSV / TSV / TXT — auto-detect delimiter via PapaParse
   Papa.parse(file, {
-    header: true, skipEmptyLines: true,
+    header: true,
+    skipEmptyLines: true,
+    delimitersToGuess: [',','\t',';','|'],
     complete: results => {
-      if (results.errors.length) { showToast('CSV parse error: ' + results.errors[0].message, 'error'); return; }
+      if (results.errors.length) {
+        // Filter for fatal errors only — PapaParse warns about minor things on TXT files
+        const fatal = results.errors.filter(e => e.type === 'Delimiter' || e.type === 'FieldMismatch' && e.row === undefined);
+        if (fatal.length) { showToast('Parse error: ' + results.errors[0].message, 'error'); return; }
+      }
+      if (!results.data.length) { showToast('File has no data rows', 'error'); return; }
       state.csvData = results.data;
       state.csvHeaders = results.meta.fields || [];
-      if (!state.csvData.length) { showToast('CSV has no data rows', 'error'); return; }
       renderCsv();
-      showToast(`Loaded ${state.csvData.length} recipients`, 'success');
+      const fmt = (ext || 'CSV').toUpperCase();
+      showToast(`Loaded ${state.csvData.length} recipients from ${fmt}`, 'success');
     }
   });
 }
@@ -1603,6 +1756,246 @@ const styleTag = document.createElement('style');
 styleTag.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
 document.head.appendChild(styleTag);
 
+/* ============== PWA: Logo, Manifest, Install, Service Worker ============== */
+
+/**
+ * Draws the CertForge logo onto a canvas of the given size.
+ * Logo: navy rounded square + cream/gold "C" in serif italic + small gold seal
+ */
+function drawCertForgeLogo(canvas, size, options = {}) {
+  const ctx = canvas.getContext('2d');
+  canvas.width = size;
+  canvas.height = size;
+  ctx.clearRect(0, 0, size, size);
+  const maskable = !!options.maskable;
+  // Maskable icons need ~80% safe zone — pad inward
+  const pad = maskable ? size * 0.10 : 0;
+  const inner = size - pad * 2;
+
+  // For maskable, fill entire canvas with solid navy first (safe outer area)
+  if (maskable) {
+    ctx.fillStyle = '#1d2945';
+    ctx.fillRect(0, 0, size, size);
+  }
+
+  // Rounded square mark
+  const r = inner * 0.22;
+  const x = pad, y = pad, w = inner, h = inner;
+  ctx.fillStyle = '#1d2945';
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.fill();
+
+  // Soft gold corner highlight (top-right diagonal)
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  ctx.clip();
+  const grad = ctx.createLinearGradient(x + w * 0.4, y, x + w, y + h * 0.6);
+  grad.addColorStop(0, 'rgba(244,227,182,0)');
+  grad.addColorStop(1, 'rgba(244,227,182,0.18)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(x, y, w, h);
+  ctx.restore();
+
+  // The "C" — large, italic, serif, in cream gold
+  ctx.fillStyle = '#f4e3b6';
+  const fontSize = inner * 0.66;
+  ctx.font = `italic 800 ${fontSize}px "Fraunces", Georgia, "Times New Roman", serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('C', x + w / 2, y + h * 0.54);
+
+  // Small gold seal/dot in lower-right (suggests certificate)
+  const sealR = inner * 0.085;
+  const sealX = x + w * 0.78;
+  const sealY = y + h * 0.78;
+  ctx.fillStyle = '#c89b3c';
+  ctx.beginPath();
+  ctx.arc(sealX, sealY, sealR, 0, Math.PI * 2);
+  ctx.fill();
+  // Inner highlight
+  ctx.fillStyle = '#f4e3b6';
+  ctx.beginPath();
+  ctx.arc(sealX - sealR * 0.25, sealY - sealR * 0.25, sealR * 0.30, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function generateIconDataUrl(size, options) {
+  const canvas = document.createElement('canvas');
+  drawCertForgeLogo(canvas, size, options);
+  return canvas.toDataURL('image/png');
+}
+
+/* SVG version of the logo for the favicon (crisp at any size) */
+const logoSvgString = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="g" x1="40%" y1="0%" x2="100%" y2="60%">
+      <stop offset="0%" stop-color="#f4e3b6" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#f4e3b6" stop-opacity="0.18"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="100" height="100" rx="22" ry="22" fill="#1d2945"/>
+  <rect x="0" y="0" width="100" height="100" rx="22" ry="22" fill="url(#g)"/>
+  <text x="50" y="68" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-weight="800" font-size="66" fill="#f4e3b6">C</text>
+  <circle cx="78" cy="78" r="8.5" fill="#c89b3c"/>
+  <circle cx="76" cy="76" r="2.5" fill="#f4e3b6"/>
+</svg>`;
+const logoSvgDataUrl = 'data:image/svg+xml;utf8,' + encodeURIComponent(logoSvgString);
+
+/* Generate icon set and inject into <link> tags + manifest */
+function setupAppIcons() {
+  const icon192 = generateIconDataUrl(192);
+  const icon512 = generateIconDataUrl(512);
+  const icon512Maskable = generateIconDataUrl(512, { maskable: true });
+  const appleIcon = generateIconDataUrl(180);
+
+  // Favicon — SVG for sharpness at any size
+  document.getElementById('favIcon').href = logoSvgDataUrl;
+
+  // Apple touch icon — PNG required
+  const appleEl = document.getElementById('appleIcon');
+  appleEl.href = appleIcon;
+  appleEl.setAttribute('sizes', '180x180');
+
+  // Manifest with embedded PNG icons
+  const manifest = {
+    name: "CertForge — Bulk Certificate Generator",
+    short_name: "CertForge",
+    description: "Bulk certificate generator that runs entirely in your browser. Crafted by Aayush Singh.",
+    start_url: ".",
+    scope: ".",
+    display: "standalone",
+    orientation: "any",
+    background_color: "#fbf8f3",
+    theme_color: "#1d2945",
+    categories: ["productivity", "utilities", "business"],
+    icons: [
+      { src: icon192, sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: icon512, sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: icon512Maskable, sizes: "512x512", type: "image/png", purpose: "maskable" }
+    ]
+  };
+  const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+  document.getElementById('appManifest').href = URL.createObjectURL(manifestBlob);
+}
+
+/* ============== Install prompt handling ============== */
+let deferredInstallPrompt = null;
+const installPill = document.getElementById('installPill');
+const iosHint = document.getElementById('iosHint');
+const iosHintClose = document.getElementById('iosHintClose');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Chrome/Edge/Android Chrome — defer the browser's prompt and show our own
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  installPill.classList.add('show');
+});
+
+installPill.addEventListener('click', async () => {
+  if (deferredInstallPrompt) {
+    deferredInstallPrompt.prompt();
+    try {
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        showToast('CertForge installed!', 'success');
+      }
+    } catch (err) { /* ignore */ }
+    deferredInstallPrompt = null;
+    installPill.classList.remove('show');
+  } else if (isIOSStandaloneCapable()) {
+    iosHint.classList.add('show');
+  } else {
+    showToast('Use your browser menu → "Install app" or "Add to Home Screen"', '');
+  }
+});
+
+iosHintClose.addEventListener('click', () => iosHint.classList.remove('show'));
+
+window.addEventListener('appinstalled', () => {
+  installPill.classList.remove('show');
+  iosHint.classList.remove('show');
+  showToast('CertForge installed — find it on your home screen', 'success');
+});
+
+function isIOSStandaloneCapable() {
+  const ua = navigator.userAgent;
+  const isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  return isIOS && !isStandalone;
+}
+
+/* On iOS Safari there's no beforeinstallprompt — show a button so users know they can install */
+function setupIOSInstallButton() {
+  if (isIOSStandaloneCapable()) {
+    installPill.classList.add('show');
+  }
+}
+
+/* ============== Service Worker (best-effort, for offline + PWA installability on Chrome) ============== */
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  // SW only works on http(s) origins, not file:// — silently skip if local
+  if (!/^https?:$/.test(location.protocol)) return;
+
+  const swCode = `
+    const CACHE = 'certforge-v1';
+    self.addEventListener('install', e => {
+      self.skipWaiting();
+      e.waitUntil(caches.open(CACHE).then(c => c.add('./').catch(() => {})));
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(self.clients.claim());
+    });
+    self.addEventListener('fetch', e => {
+      const req = e.request;
+      if (req.method !== 'GET') return;
+      e.respondWith(
+        fetch(req).then(res => {
+          // Cache successful same-origin responses
+          if (res && res.ok && new URL(req.url).origin === location.origin) {
+            const copy = res.clone();
+            caches.open(CACHE).then(c => c.put(req, copy)).catch(() => {});
+          }
+          return res;
+        }).catch(() => caches.match(req).then(c => c || caches.match('./')))
+      );
+    });
+  `;
+
+  try {
+    const swBlob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl, { scope: './' }).catch(() => {
+      // Some browsers (recent Chrome) block blob: SW registration.
+      // That's OK — Add to Home Screen still works on iOS, and the app works fine online.
+    });
+  } catch (e) { /* ignore */ }
+}
+
+/* ============== Init ============== */
+setupAppIcons();
+registerServiceWorker();
+setupIOSInstallButton();
 loadState();
 gotoStep(1);
 </script>
